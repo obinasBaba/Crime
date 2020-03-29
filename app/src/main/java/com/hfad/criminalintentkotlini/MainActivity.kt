@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         if ( fragment == null )
         {
             Log.d( TAG, "in let" )
-            fragment = CrimeFragment.newInstance()
+            fragment = CrimeListFragment.newInstance()
             val fragTransaction : FragmentTransaction = fMgr.beginTransaction()
             fragTransaction.add( R.id.fragment_container_view, fragment  )
             fragTransaction.setTransition( FragmentTransaction.TRANSIT_FRAGMENT_FADE )
