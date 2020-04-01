@@ -3,9 +3,11 @@ package com.hfad.criminalintentkotlini
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import com.hfad.criminalintentkotlini.Fragments.CrimeListFragment
 
 const val TAG : String = "MAIN"
 class MainActivity : AppCompatActivity() {
@@ -13,6 +15,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val toolbar : Toolbar = findViewById( R.id.toolbar_id )
+        setSupportActionBar( toolbar )
+        supportActionBar?.title = resources.getString( R.string.app_name )
 
        val fMgr : FragmentManager = supportFragmentManager
         var fragment : Fragment? = fMgr.findFragmentById( R.id.fragment_container_view )

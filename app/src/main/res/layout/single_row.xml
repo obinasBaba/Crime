@@ -1,16 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_margin="5dp"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:id="@+id/relative_id"
+    android:layout_margin="6dp">
+
+
+    <LinearLayout
+        android:id="@+id/linear_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+        <TextView
+            android:id="@+id/sup_id"
+            style="@style/TextAppearance.AppCompat.Headline"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".9"
+            android:text="@string/Sup" />
+
+        <CheckBox
+            android:id="@+id/solvedCheckbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:layout_weight=".1" />
+
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/sup_id"
+        android:id="@+id/dateText_id"
+        style="@style/TextAppearance.AppCompat.Body1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="sup"
-        />
+        android:layout_below="@id/linear_id"
+        android:text="@string/Sup" />
+
 </RelativeLayout>

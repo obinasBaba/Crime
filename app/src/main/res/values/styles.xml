@@ -1,13 +1,27 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat">
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- disable the splash screen. -->
+<!--        <item name="android:windowDisablePreview">true</item>-->
+<!--        <item name="windowActionBar">false</item>-->
+
+        <item name="actionMenuTextColor">@color/c2</item>
+
+        <!-- No title in this windows. -->
+        <item name="android:windowNoTitle">true</item>
+
+        <!-- ActionMode overlay Toolbar. -->
+        <item name="windowActionModeOverlay">true</item>
+
+        <!-- Custom background for actionMode. -->
+        <item name="actionModeBackground">@color/c3</item>
+
     </style>
 
-    <style name="myStyle" parent="@style/AppTheme">
-        <item name="android:textColor">@color/c1</item>
-    </style>
+
 
 </resources>

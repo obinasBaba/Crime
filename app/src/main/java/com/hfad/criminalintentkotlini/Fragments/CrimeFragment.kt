@@ -1,4 +1,4 @@
-package com.hfad.criminalintentkotlini
+package com.hfad.criminalintentkotlini.Fragments
 
 import android.os.Bundle
 import android.text.Editable
@@ -10,15 +10,16 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
-import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
 import com.hfad.criminalintentkotlini.Model.CrimeViewModel
+import com.hfad.criminalintentkotlini.R
 
 
 class CrimeFragment : Fragment() {
 
     companion object {
-        fun newInstance() = CrimeFragment()
+        fun newInstance() =
+            CrimeFragment()
     }
 
     //Initialized at first access
@@ -28,7 +29,7 @@ class CrimeFragment : Fragment() {
     private lateinit var solved: CheckBox
 
     override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View? {
-        val view : View =  inflater.inflate( R.layout.crime_fragment, container, false )
+        val view : View =  inflater.inflate(R.layout.crime_fragment, container, false )
 
         title = view.findViewById(R.id.crime_title) as EditText
         title.setText( viewModel.getTitle() )
@@ -39,7 +40,7 @@ class CrimeFragment : Fragment() {
             isEnabled = false
         }
 
-        solved = view.findViewById( R.id.crime_solved )
+        solved = view.findViewById(R.id.crime_solved)
 
         return view;
     }
