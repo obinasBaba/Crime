@@ -1,4 +1,4 @@
-package com.hfad.criminalintentkotlini.Fragments
+package com.hfad.criminalintentkotlini.Cotroller.Fragments
 
 import android.os.Bundle
 import android.text.Editable

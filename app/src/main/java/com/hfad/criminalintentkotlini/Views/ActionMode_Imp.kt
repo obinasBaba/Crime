@@ -4,7 +4,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import androidx.fragment.app.Fragment
-import com.hfad.criminalintentkotlini.Fragments.CrimeListFragment
+import com.hfad.criminalintentkotlini.Cotroller.Fragments.CrimeListFragment
 import com.hfad.criminalintentkotlini.R
 
 class ActionMode_Imp constructor(val recyclerAdapter: RecyclerAdapter, private val fragment: Fragment )
@@ -14,7 +14,7 @@ class ActionMode_Imp constructor(val recyclerAdapter: RecyclerAdapter, private v
     override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
 
         when( item?.itemId ){
-            R.id.action_delete -> { (fragment as CrimeListFragment ).deleteSelectedItems()  }
+            R.id.action_delete -> { (fragment as CrimeListFragment).deleteSelectedItems()  }
             R.id.action_copy -> { }
             R.id.action_forward -> { }
         }

@@ -1,4 +1,4 @@
-package com.hfad.criminalintentkotlini
+package com.hfad.criminalintentkotlini.Cotroller
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -7,7 +7,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import com.hfad.criminalintentkotlini.Fragments.CrimeListFragment
+import com.hfad.criminalintentkotlini.Cotroller.Fragments.CrimeListFragment
+import com.hfad.criminalintentkotlini.R
 
 const val TAG : String = "MAIN"
 class MainActivity : AppCompatActivity() {
@@ -16,19 +17,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val toolbar : Toolbar = findViewById( R.id.toolbar_id )
+        val toolbar : Toolbar = findViewById(R.id.toolbar_id)
         setSupportActionBar( toolbar )
-        supportActionBar?.title = resources.getString( R.string.app_name )
+        supportActionBar?.title = resources.getString(R.string.app_name)
 
        val fMgr : FragmentManager = supportFragmentManager
-        var fragment : Fragment? = fMgr.findFragmentById( R.id.fragment_container_view )
+        var fragment : Fragment? = fMgr.findFragmentById(R.id.fragment_container_view)
 
         if ( fragment == null )
         {
-            Log.d( TAG, "in let" )
+            Log.d(TAG, "in let" )
             fragment = CrimeListFragment.newInstance()
             val fragTransaction : FragmentTransaction = fMgr.beginTransaction()
-            fragTransaction.add( R.id.fragment_container_view, fragment  )
+            fragTransaction.add(R.id.fragment_container_view, fragment  )
             fragTransaction.setTransition( FragmentTransaction.TRANSIT_FRAGMENT_FADE )
             fragTransaction.commit()
         }

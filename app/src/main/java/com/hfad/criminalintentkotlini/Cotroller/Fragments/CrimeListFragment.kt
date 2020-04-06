@@ -1,4 +1,4 @@
-package com.hfad.criminalintentkotlini.Fragments
+package com.hfad.criminalintentkotlini.Cotroller.Fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,11 +11,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.hfad.criminalintentkotlini.Cotroller.TouchListener_Imp
 import com.hfad.criminalintentkotlini.Model.CrimeListViewModel
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.Views.ActionMode_Imp
 import com.hfad.criminalintentkotlini.Views.RecyclerAdapter
-import com.hfad.criminalintentkotlini.Views.TouchListener_Imp
 
 interface ClickListeners{
     fun doo(){
@@ -45,22 +45,30 @@ class CrimeListFragment : Fragment() {
         if (viewModel.sparseBoolean.size() > 0)
             startActionMode( null )
 
-        implementListeners()
+        implementListeners()    
         return recyclerView;
     }
 
     private fun implementListeners()
     {
-        recyclerView.addOnItemTouchListener( TouchListener_Imp( context, recyclerView, object : ClickListeners{
-            override fun onClick(pos: Int, view: View) {
-                actionMode?.run { startActionMode( pos ) } ?: handleOnClick( pos, view )
+        recyclerView.addOnItemTouchListener(
+            TouchListener_Imp(
+                context,
+                recyclerView,
+                object :
+                    ClickListeners {
+                    override fun onClick(pos: Int, view: View) {
+                        actionMode?.run { startActionMode(pos) } ?: handleOnClick(pos, view)
 
-            }
+                    }
 
-            override fun onLongClick(pos: Int, view: View) {
-                startActionMode( pos )
-            }
-        } , this) )
+                    override fun onLongClick(pos: Int, view: View) {
+                        startActionMode(pos)
+                    }
+                },
+                this
+            )
+        )
 
     }
 
@@ -99,8 +107,9 @@ class CrimeListFragment : Fragment() {
         for (i in selectedSize downTo 0) {
             if (recyclerAdapter.sparseBoolean.valueAt(i)) {
                 //If current id is selected remove the item via key
-                viewModel.remove( recyclerAdapter.sparseBoolean.keyAt(i) )
-                recyclerAdapter.notifyDataSetChanged() //notify adapter
+                viewModel.remove( recyclerAdapter.sparseBoolean.keyAt( i ) )
+                recyclerAdapter.notifyItemRemoved( recyclerAdapter.sparseBoolean.keyAt( i ) )
+//                recyclerAdapter.notifyDataSetChanged() //notify adapter
             }
         }
 
@@ -115,7 +124,7 @@ class CrimeListFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.sparseBoolean = recyclerAdapter.sparseBoolean
+      //  viewModel.sparseBoolean = recyclerAdapter.sparseBoolean
     }
 
 }
