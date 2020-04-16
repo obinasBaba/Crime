@@ -48,7 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="10dp"
-            tools:context=".Cotroller.MainActivity"
+            tools:context=".UI.MainActivity"
             tools:showIn="@layout/crime_list_fragment" />
 
     </androidx.core.widget.NestedScrollView>

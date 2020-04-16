@@ -1,11 +1,12 @@
-package com.hfad.criminalintentkotlini.Views
+package com.hfad.criminalintentkotlini.UI
 
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import androidx.fragment.app.Fragment
-import com.hfad.criminalintentkotlini.Cotroller.Fragments.CrimeListFragment
 import com.hfad.criminalintentkotlini.R
+import com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeListFragment
+import com.hfad.criminalintentkotlini.UI.Fragemnts.RecyclerAdapter
 
 class ActionMode_Imp constructor(val recyclerAdapter: RecyclerAdapter, private val fragment: Fragment )
 
@@ -18,7 +19,6 @@ class ActionMode_Imp constructor(val recyclerAdapter: RecyclerAdapter, private v
             R.id.action_copy -> { }
             R.id.action_forward -> { }
         }
-
         return true
     }
 

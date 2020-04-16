@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SQLAndroidSettings">
+    <option name="databases">
+      <map>
+        <entry key="crime.db_C:\Users\henok\AndroidStudioProjects\CriminalIntentKotlini\AndroidSqlEditorDatabases\">
+          <value>
+            <list>
+              <option value="H533X60001234567" />
+              <option value="/databases/crime.db" />
+              <option value="crime.db" />
+              <option value="crime.db" />
+              <option value="false" />
+              <option value="com.hfad.criminalintentkotlini" />
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="storageVersion" value="2" />
+  </component>
+</project>

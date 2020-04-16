@@ -1,4 +1,4 @@
-package com.hfad.criminalintentkotlini.Cotroller
+package com.hfad.criminalintentkotlini.UI
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -7,8 +7,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import com.hfad.criminalintentkotlini.Cotroller.Fragments.CrimeListFragment
 import com.hfad.criminalintentkotlini.R
+import com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeListFragment
 
 const val TAG : String = "MAIN"
 class MainActivity : AppCompatActivity() {
@@ -33,5 +33,9 @@ class MainActivity : AppCompatActivity() {
             fragTransaction.setTransition( FragmentTransaction.TRANSIT_FRAGMENT_FADE )
             fragTransaction.commit()
         }
+    }
+
+    override fun onBackPressed() {
+
     }
 }

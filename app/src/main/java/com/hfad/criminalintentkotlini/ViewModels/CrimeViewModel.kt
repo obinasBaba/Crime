@@ -1,9 +1,10 @@
-package com.hfad.criminalintentkotlini.Model
+package com.hfad.criminalintentkotlini.ViewModels
 
 import androidx.lifecycle.ViewModel
+import com.hfad.criminalintentkotlini.Model.Crime
 
 //Will survive config changes
-class CrimeViewModel : ViewModel() {
+class CrimeViewModel( ) : ViewModel() {
 
     private val crime : Crime
         get() = Crime()
@@ -15,6 +16,4 @@ class CrimeViewModel : ViewModel() {
     fun getTitle() : String = crime.title
 
     fun getDate() = crime.date.toString()
-
-
 }
