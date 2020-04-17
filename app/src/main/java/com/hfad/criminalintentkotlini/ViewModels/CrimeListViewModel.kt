@@ -1,7 +1,6 @@
 package com.hfad.criminalintentkotlini.ViewModels
 
 import android.app.Application
-import android.database.Cursor
 import android.util.SparseBooleanArray
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
@@ -13,27 +12,27 @@ import kotlin.properties.Delegates
 
 class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( applicationCtx ) {
 
-    private var mutableCursor : MutableLiveData< Cursor >
-    private lateinit var cursor : Cursor
 
     private val dataMgr : DataManager = DataManager.getInstance( getApplication() )
+    private var mutableCursor : MutableLiveData< List< Crime > >
+    private lateinit var crimeList : List< Crime >
+
     var sparseBoolean : SparseBooleanArray by Delegates.observable( SparseBooleanArray() ){ _, _, _ ->
         Toast.makeText( getApplication(), "Value Changed", Toast.LENGTH_SHORT).show() }
 
     init {
         readDataFromDatabase()
-        mutableCursor = MutableLiveData( cursor )
+        mutableCursor = MutableLiveData( crimeList )
         Toast.makeText( getApplication(), "MODEL VIEW STARTED", Toast.LENGTH_LONG).show()
     }
     
-    fun getCrimesCursor() : LiveData< Cursor > = mutableCursor
-
+    fun getCrimes() : LiveData< List< Crime > > = mutableCursor
 
     private fun readDataFromDatabase() {
-        dataMgr.readBulk { cursorFromDB -> cursor = cursorFromDB }
+        dataMgr.readBulk { cursorFromDB -> crimeList = cursorFromDB }
     }
 
-    fun removeCrime(keyAt: Int) {
+    fun removeCrime( keyAt: Int) {
 
     }
 
@@ -46,7 +45,7 @@ class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( appli
     }
 
     override fun onCleared() {
-        cursor.close()
+        nullifyDB()
         super.onCleared()
     }
 }

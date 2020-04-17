@@ -1,7 +1,7 @@
 package com.hfad.criminalintentkotlini.UI.Fragemnts
 
+import android.app.Activity
 import android.content.Intent
-import android.database.Cursor
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,24 +9,30 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.hfad.criminalintentkotlini.Model.Crime
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.UI.ActionMode_Imp
 import com.hfad.criminalintentkotlini.UI.CrimeActivity
 import com.hfad.criminalintentkotlini.UI.TouchListener_Imp
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.crime_list_fragment.*
 
- const val INDEX = "index"
+const val INDEX = "index"
+const val REQUEST_CODE = 1
 
 interface ClickListeners{
     fun onClick( pos : Int, view : View )
     fun onLongClick( pos : Int, view : View )
 }
+
+
 
 class CrimeListFragment : Fragment() {
     companion object {
@@ -40,42 +46,48 @@ class CrimeListFragment : Fragment() {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        recyclerView = inflater.inflate( R.layout.crime_list_fragment, container, false) as RecyclerView
+        val view  = inflater.inflate( R.layout.crime_list_fragment, container, false)
+        recyclerView = view.findViewById( R.id.zRecyclerView )
+
+        val fab = view.findViewById( R.id.fab_id) as FloatingActionButton
+        fab.setOnClickListener{
+            startActivityForResult( Intent( context, CrimeActivity::class.java ), 1 )
+        }
 
         initRecycler()
         implementListeners()
         if ( viewModel.sparseBoolean.size() > 0 )
             startActionMode( null )
-        return recyclerView;
+
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.getCrimesCursor().observe( this.viewLifecycleOwner , Observer {
-            recyclerAdapter.changeCursor( it )  })
+        viewModel.getCrimes().observe( this.viewLifecycleOwner , Observer { recyclerAdapter.changeList( it )  })
     }
 
-    private fun implementListeners() {
+    private fun implementListeners()
+    {
         recyclerView.addOnItemTouchListener(TouchListener_Imp(context, recyclerView,
 
                 object : ClickListeners {
                     override fun onClick(pos: Int, view: View) {
                         actionMode?.let{ startActionMode(pos) } ?: recyclerAdapter.run {
-                            getItemId( pos )
+                            handleClick( recyclerAdapter.getCrimeId( pos ) )
                         }
                     }
                     override fun onLongClick(pos: Int, view: View) { startActionMode(pos) }
                 }, this )
         )
+
     }
 
-
-
-    private fun handleClick() {
+    private fun handleClick( itemId: Int ) {
         val intent = Intent( context, CrimeActivity::class.java )
-        intent.putExtra(INDEX, 1 )
-        startActivityForResult(  intent, 1 )
+        intent.putExtra( INDEX, itemId )
+        startActivityForResult(  intent, REQUEST_CODE )
     }
 
     private fun startActionMode( pos : Int? ){
@@ -98,7 +110,7 @@ class CrimeListFragment : Fragment() {
     }
 
     private fun initRecycler() {
-        recyclerAdapter = RecyclerAdapter.getInstance( null , viewModel.sparseBoolean )
+        recyclerAdapter = RecyclerAdapter.getInstance( emptyList() , viewModel.sparseBoolean )
         recyclerView.adapter = recyclerAdapter
         recyclerView.layoutManager = LinearLayoutManager( requireContext() )
     }
@@ -118,7 +130,5 @@ class CrimeListFragment : Fragment() {
         viewModel.sparseBoolean = recyclerAdapter.sparseBoolean
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Toast.makeText(context, "OnActivityResult", Toast.LENGTH_SHORT).show()
-    }
+
 }

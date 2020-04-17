@@ -1,14 +1,19 @@
 package com.hfad.criminalintentkotlini.Model
 
+import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import android.database.DataSetObserver
 import android.database.sqlite.SQLiteDatabase
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.loader.app.LoaderManager
 import com.hfad.criminalintentkotlini.Model.Database.CrimeOpenHelper
 import com.hfad.criminalintentkotlini.Model.Database.CrimeDatabaseContract.CrimeEntry
 import com.hfad.criminalintentkotlini.R
+import com.hfad.criminalintentkotlini.UI.Fragemnts.RecyclerAdapter
 import java.util.*
+import kotlin.collections.ArrayList
 
 class DataManager private constructor ( ctx : Context )
 {
@@ -24,6 +29,13 @@ class DataManager private constructor ( ctx : Context )
 
     private  val readOperation : SQLiteDatabase by lazy { CrimeOpenHelper( ctx ).readableDatabase }
     private  val writeOperation : SQLiteDatabase by lazy { CrimeOpenHelper( ctx ).writableDatabase }
+    private val dataSetObserver : DataSetObserver by lazy { DataSetObserverInner() }
+
+    private var rowId : Int = -1
+    private var titleIndex : Int = -1
+    private var solvedIndex : Int = -1
+    private var dateIndex : Int = -1
+    private var cursorIsValid : Boolean = false
 
     private val arrayOf: Array<String> by lazy { arrayOf(
         CrimeEntry.COLUMN_CRIME_ID,
@@ -31,35 +43,79 @@ class DataManager private constructor ( ctx : Context )
         CrimeEntry.COLUMN_CRIME_DATE,
         CrimeEntry.COLUMN_CRIME_SOLVED ) }
 
-    fun readBulk(onDataReadyCallback: (Cursor ) -> Unit  ){
+    fun readBulk( onDataReadyCallback: ( List< Crime > ) -> Unit  ){
 
-        val query: Cursor = readOperation.use {
-            it.query(CrimeEntry.TABLE_NAME, arrayOf,
+        val crimeList : MutableList< Crime > = ArrayList()
+        val query: Cursor = readOperation.run {
+            query(CrimeEntry.TABLE_NAME, arrayOf,
                 null, null, null, null," ${CrimeEntry.COLUMN_CRIME_TITLE}" )
         }
-        onDataReadyCallback( query )
-    }
 
-    fun queryCrimeById( id : String, crimeFromDataMgr : ( crime : Crime ) -> Boolean ) {
-
-        val cursor : Cursor = readOperation.use {
-            it.query(CrimeEntry.TABLE_NAME, arrayOf,
-                "${CrimeEntry.COLUMN_CRIME_ID} = ? ", arrayOf( id ), null, null,null )
+        indexing( query )
+        while ( query.moveToNext() ) {
+            val crime = buildCrime(query)
+            crimeList.add( crime )
         }
 
-        val crimeId = cursor.getInt( cursor.getColumnIndex( CrimeEntry.COLUMN_CRIME_ID ) )
-        val title = cursor.getString( cursor.getColumnIndex(CrimeEntry.COLUMN_CRIME_TITLE) )
-        val date = Date( cursor.getString( cursor.getColumnIndex(CrimeEntry.COLUMN_CRIME_DATE) ) )
-        val solved = cursor.getInt( cursor.getColumnIndex( CrimeEntry.COLUMN_CRIME_SOLVED ) ) == 0
-
-        val crime = Crime( crimeId, title, solved , date )
-        crimeFromDataMgr( crime )
-
-        cursor.close()
+        query.close()
+        onDataReadyCallback( crimeList )
     }
 
+    fun queryCrimeById( id : String ) : Crime {
+
+        val cursor : Cursor = readOperation.query(CrimeEntry.TABLE_NAME, arrayOf,
+                "${CrimeEntry.COLUMN_CRIME_ID} = ? ", arrayOf( id ), null, null,null )
+
+        cursor.moveToFirst()
+
+        indexing( cursor )
+        val crimeId = cursor.getInt( rowId )
+        val title = cursor.getString( titleIndex )
+        val date = Date( cursor.getString( dateIndex ) )
+        val solved = cursor.getInt( solvedIndex ) == 0
+
+        cursor.close()
+        return Crime( crimeId, title, solved, date )
+    }
+
+
     fun closeDB(){
-        if ( readOperation.isOpen )
-               readOperation.close()
+
+    }
+
+    fun updateCrimeDb(crimeById: Crime, columnToUpdate: Array<String>) {
+
+        val contentValue : ContentValues = ContentValues()
+
+        contentValue.put( CrimeEntry.COLUMN_CRIME_TITLE, crimeById.title )
+        contentValue.put( CrimeEntry.COLUMN_CRIME_SOLVED, crimeById.solved)
+        writeOperation.update( CrimeEntry.TABLE_NAME, contentValue, CrimeEntry.COLUMN_CRIME_ID + " = ? ", arrayOf( crimeById.id.toString() )  )
+    }
+
+    private  fun  buildCrime( cursor : Cursor ) : Crime {
+        val id = cursor.getInt( rowId )
+        val title = cursor.getString( titleIndex )
+        val date = Date( cursor.getString( dateIndex ) )
+        val solved = cursor.getInt( solvedIndex ) == 0
+        return Crime( id, title, solved, date )
+    }
+
+    private fun indexing( cursor: Cursor ) {
+        rowId = cursor.getColumnIndex( CrimeEntry.COLUMN_CRIME_ID )
+        titleIndex = cursor.getColumnIndex(CrimeEntry.COLUMN_CRIME_TITLE)
+        solvedIndex = cursor.getColumnIndex(CrimeEntry.COLUMN_CRIME_SOLVED)
+        dateIndex = cursor.getColumnIndex(CrimeEntry.COLUMN_CRIME_DATE)
+    }
+
+    inner class DataSetObserverInner : DataSetObserver(){
+        override fun onChanged() {
+            cursorIsValid = true
+
+        }
+        override fun onInvalidated() {
+            super.onInvalidated()
+            cursorIsValid = false
+        }
+
     }
 }
