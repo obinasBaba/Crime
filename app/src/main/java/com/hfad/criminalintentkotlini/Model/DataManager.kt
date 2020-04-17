@@ -2,54 +2,64 @@ package com.hfad.criminalintentkotlini.Model
 
 import android.content.Context
 import android.database.Cursor
-import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
+import android.widget.ImageView
+import android.widget.TextView
 import com.hfad.criminalintentkotlini.Model.Database.CrimeOpenHelper
 import com.hfad.criminalintentkotlini.Model.Database.CrimeDatabaseContract.CrimeEntry
+import com.hfad.criminalintentkotlini.R
 import java.util.*
-import kotlin.collections.ArrayList
 
- class DataManager ( ctx : Context )
+class DataManager private constructor ( ctx : Context )
 {
-    private  var crimeRead : SQLiteDatabase = CrimeOpenHelper( ctx ).readableDatabase
+    // TODO - Synchronizing
+    companion object{
+        private var instance : DataManager? = null
 
-
-    fun readData( onDataReadyCallback: ( ArrayList<Crime> ) -> Unit  ){
-
-        val crimeList : ArrayList<Crime> =  ArrayList()
-
-        val arrayOf: Array<String> = arrayOf(
-            CrimeEntry.COLUMN_CRIME_TITLE,
-            CrimeEntry.COLUMN_CRIME_DATE,
-            CrimeEntry.COLUMN_CRIME_SOLVED
-        )
-        val query: Cursor = crimeRead.query(CrimeEntry.TABLE_NAME, arrayOf,
-            null, null, null, null, CrimeEntry.COLUMN_CRIME_TITLE)
-
-        val titleIndex = query.getColumnIndex(CrimeEntry.COLUMN_CRIME_TITLE)
-        val solvedIndex = query.getColumnIndex(CrimeEntry.COLUMN_CRIME_SOLVED)
-        val dateIndex = query.getColumnIndex(CrimeEntry.COLUMN_CRIME_DATE)
-
-        try {
-            while ( query.moveToNext() ) {
-
-                val title = query.getString( titleIndex )
-                val solved : Boolean = query.getInt( solvedIndex ) == 0;
-                val date = query.getString( dateIndex )
-
-                val crime = Crime( 0, title, solved, Date( date ))
-                crimeList.add( crime )
+        fun getInstance( ctx : Context ) : DataManager =
+            instance ?: DataManager( ctx ).also {
+                instance = it
             }
-        }catch ( e : SQLException ){
-            e.printStackTrace()
+    }
+
+    private  val readOperation : SQLiteDatabase by lazy { CrimeOpenHelper( ctx ).readableDatabase }
+    private  val writeOperation : SQLiteDatabase by lazy { CrimeOpenHelper( ctx ).writableDatabase }
+
+    private val arrayOf: Array<String> by lazy { arrayOf(
+        CrimeEntry.COLUMN_CRIME_ID,
+        CrimeEntry.COLUMN_CRIME_TITLE,
+        CrimeEntry.COLUMN_CRIME_DATE,
+        CrimeEntry.COLUMN_CRIME_SOLVED ) }
+
+    fun readBulk(onDataReadyCallback: (Cursor ) -> Unit  ){
+
+        val query: Cursor = readOperation.use {
+            it.query(CrimeEntry.TABLE_NAME, arrayOf,
+                null, null, null, null," ${CrimeEntry.COLUMN_CRIME_TITLE}" )
+        }
+        onDataReadyCallback( query )
+    }
+
+    fun queryCrimeById( id : String, crimeFromDataMgr : ( crime : Crime ) -> Boolean ) {
+
+        val cursor : Cursor = readOperation.use {
+            it.query(CrimeEntry.TABLE_NAME, arrayOf,
+                "${CrimeEntry.COLUMN_CRIME_ID} = ? ", arrayOf( id ), null, null,null )
         }
 
-        query.close()
+        val crimeId = cursor.getInt( cursor.getColumnIndex( CrimeEntry.COLUMN_CRIME_ID ) )
+        val title = cursor.getString( cursor.getColumnIndex(CrimeEntry.COLUMN_CRIME_TITLE) )
+        val date = Date( cursor.getString( cursor.getColumnIndex(CrimeEntry.COLUMN_CRIME_DATE) ) )
+        val solved = cursor.getInt( cursor.getColumnIndex( CrimeEntry.COLUMN_CRIME_SOLVED ) ) == 0
 
-        onDataReadyCallback( crimeList )
+        val crime = Crime( crimeId, title, solved , date )
+        crimeFromDataMgr( crime )
+
+        cursor.close()
     }
 
     fun closeDB(){
-        crimeRead.close()
+        if ( readOperation.isOpen )
+               readOperation.close()
     }
 }

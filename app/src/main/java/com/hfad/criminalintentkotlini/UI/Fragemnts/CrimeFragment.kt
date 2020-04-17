@@ -21,23 +21,18 @@ import java.util.*
 class CrimeFragment : Fragment() {
 
     companion object {
-        fun newInstance() =
-            CrimeFragment()
+        fun newInstance() = CrimeFragment()
     }
 
-    private val viewModel: CrimeListViewModel by lazy{ ViewModelProvider( this ).get( CrimeListViewModel::class.java) }
+    private val viewModel: CrimeViewModel by lazy{ ViewModelProvider( this ).get( CrimeViewModel::class.java) }
 
-    private var index = 0
+    private var index = -1
     //Initialized at first access
     private lateinit var dateButton: Button
     private lateinit var title: EditText
     private lateinit var solved: CheckBox
-    private lateinit var editableCrime : Crime
-
-
 
     override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View? {
-
         val view : View =  inflater.inflate(R.layout.crime_fragment, container, false )
         title = view.findViewById(R.id.crime_title) as EditText
         dateButton = view.findViewById(R.id.crime_date) as Button
@@ -45,18 +40,10 @@ class CrimeFragment : Fragment() {
         return view;
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) { super.onActivityCreated(savedInstanceState)
 
         index = activity?.intent?.getIntExtra( "Index", 0 ) ?: throw IllegalStateException("No Bundle send")
 
-        editableCrime =  viewModel.getCrimes().value?.elementAt( index ) ?: Crime()
-
-        title.setText( editableCrime.title ?: "Not Found" )
-        dateButton.apply{
-            this.text =  editableCrime.date.toString()
-            isEnabled = false
-        }
     }
 
     override fun onStart() {
@@ -67,14 +54,14 @@ class CrimeFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                editableCrime.title = s.toString()
+
             }
+
         } )
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
     }
 
 }

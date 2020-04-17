@@ -16,6 +16,7 @@ class DatabaseFillUp( val db : SQLiteDatabase? )
        putInto("Rape",1)
        putInto("Snatch and grape",0)
        putInto("poising rise",1)
+        repeat( 20){ putInto("SampleCrime $it",0) }
     }
 
     private fun putInto( title : String, solved : Int ){

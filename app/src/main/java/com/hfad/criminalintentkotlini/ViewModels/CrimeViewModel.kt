@@ -1,19 +1,21 @@
 package com.hfad.criminalintentkotlini.ViewModels
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import com.hfad.criminalintentkotlini.Model.Crime
+import com.hfad.criminalintentkotlini.Model.DataManager
 
 //Will survive config changes
-class CrimeViewModel( ) : ViewModel() {
-
-    private val crime : Crime
-        get() = Crime()
-
-    fun setTitle( title : String ){
-        crime.title = title
+class CrimeViewModel( application: Application ) : AndroidViewModel( application )
+{
+    private val dataManager : DataManager by lazy{
+        DataManager.getInstance( getApplication() )
     }
 
-    fun getTitle() : String = crime.title
+    fun queryCrimeById(){
 
-    fun getDate() = crime.date.toString()
+    }
+
+
 }
