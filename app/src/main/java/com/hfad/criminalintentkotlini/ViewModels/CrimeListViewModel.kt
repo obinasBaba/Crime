@@ -14,29 +14,22 @@ class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( appli
 
 
     private val dataMgr : DataManager = DataManager.getInstance( getApplication() )
-    private var mutableCursor : MutableLiveData< List< Crime > >
-    private lateinit var crimeList : List< Crime >
+    private var mutableCursor : MutableLiveData< List< Crime > > = MutableLiveData( ArrayList() )
+    var firstTime : Boolean = true
 
     var sparseBoolean : SparseBooleanArray by Delegates.observable( SparseBooleanArray() ){ _, _, _ ->
         Toast.makeText( getApplication(), "Value Changed", Toast.LENGTH_SHORT).show() }
 
     init {
-        readDataFromDatabase()
-        mutableCursor = MutableLiveData( crimeList )
         Toast.makeText( getApplication(), "MODEL VIEW STARTED", Toast.LENGTH_LONG).show()
     }
     
     fun getCrimes() : LiveData< List< Crime > > = mutableCursor
 
-    private fun readDataFromDatabase() {
-        dataMgr.readBulk { cursorFromDB -> crimeList = cursorFromDB }
-    }
+     fun readDataFromDatabase() : ArrayList< Crime > =  dataMgr.readBulk{  mutableCursor.postValue( it )  }
+
 
     fun removeCrime( keyAt: Int) {
-
-    }
-
-    fun addCrime( crime : Crime ){
 
     }
 
@@ -45,6 +38,7 @@ class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( appli
     }
 
     override fun onCleared() {
+        Toast.makeText( getApplication(), "MODEL VIEW DESTROYED", Toast.LENGTH_LONG).show()
         nullifyDB()
         super.onCleared()
     }

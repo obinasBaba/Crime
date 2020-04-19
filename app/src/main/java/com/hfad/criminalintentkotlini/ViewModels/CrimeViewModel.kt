@@ -9,47 +9,53 @@ import com.hfad.criminalintentkotlini.Model.Crime
 import com.hfad.criminalintentkotlini.Model.DataManager
 
 //Will survive config changes
-class CrimeViewModel(application: Application) : AndroidViewModel(application) {
-
+class CrimeViewModel(application: Application) : AndroidViewModel(application)
+{
     private val dataManager: DataManager by lazy { DataManager.getInstance(getApplication()) }
+    private val mutableCrime: MutableLiveData<Crime> by lazy { MutableLiveData<Crime>() }
+
     var surviveConfigChange: Crime? = null
     var changesToUpdate: MutableList<String> = ArrayList()
     var crimeModified = false // Determine whether to update give crime or not
     var cachedCrime: Crime? = null // A crime use to compare for change
     var cachedIndex: Int = -1
 
-    private val mutableCrime: MutableLiveData<Crime> by lazy { MutableLiveData(Crime()) }
-
-    fun getMutableCrime(index: Int): LiveData<Crime> {
-        mutableCrime.value = queryCrimeById(index)
+    fun getMutableCrime(): LiveData<Crime> {
         return mutableCrime
     }
 
-    private fun queryCrimeById( newIndex: Int ): Crime? {
+    fun queryCrimeById( newIndex: Int ): Crime? {
 
         return when {
-            newIndex == cachedIndex -> {
-                null  // Prevent reQuery
-            }
             newIndex != cachedIndex -> {
-                // Query for the first time Cache and Return
+                // Query for the first time, Cache and Return
                 cachedIndex = newIndex
                 cachedCrime = dataManager.queryCrimeById(newIndex.toString())
+                mutableCrime.postValue( cachedCrime )
                 cachedCrime
+            }
+            newIndex == cachedIndex -> {
+                null  // Prevent reQuery
             }
             else -> cachedCrime
         }
     }
 
+    // TODO -  RUN ON BACKGROUND
     fun updateCrime(crimeById: Crime) {
-        Toast.makeText(getApplication(), "$crimeById \n${changesToUpdate.size} ", Toast.LENGTH_LONG)
-            .show()
-        dataManager.updateCrimeDb(crimeById, changesToUpdate.distinct().toTypedArray())
+        dataManager.updateCrimeDb(crimeById, changesToUpdate.distinct().toTypedArray() )
     }
 
     fun createCrime(  ) {
-        Toast.makeText(getApplication(), "Creating a new Crime", Toast.LENGTH_LONG)
-            .show()
+
+    }
+
+    fun revertEverything(){
+        cachedIndex = -1
+        cachedCrime = null
+        crimeModified = false
+        surviveConfigChange = null
+        changesToUpdate = ArrayList()
     }
 
 }

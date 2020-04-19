@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -12,6 +13,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.loader.app.LoaderManager
+import androidx.loader.content.AsyncTaskLoader
+import androidx.loader.content.CursorLoader
+import androidx.loader.content.Loader
 import com.hfad.criminalintentkotlini.Model.Crime
 import com.hfad.criminalintentkotlini.Model.Database.CrimeDatabaseContract.*
 import com.hfad.criminalintentkotlini.ViewModels.CrimeViewModel
@@ -21,8 +26,12 @@ import kotlin.properties.Delegates
 
 const val CHANGED = "changed"
 
-class CrimeFragment : Fragment() {
+private const val UPDATE_CRIME = 1
+private const val CREATE_CRIME = 2
+private const val QUERY_CRIME = 3
 
+class CrimeFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
+{
     companion object {
         fun newInstance() = CrimeFragment()
     }
@@ -46,12 +55,16 @@ class CrimeFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) { super.onActivityCreated(savedInstanceState)
 
-        index = activity?.intent?.getIntExtra( INDEX, -1 ) ?: -1
+        index = activity?.intent?.getIntExtra( INDEX, -1 )!!
+        if ( index != -1 )
+            LoaderManager.getInstance( this ).initLoader( QUERY_CRIME, null, this )
 
-        viewModel.getMutableCrime( index ).observe( viewLifecycleOwner, Observer {
+
+        viewModel.getMutableCrime().observe( viewLifecycleOwner, Observer {
             when {
                 viewModel.surviveConfigChange != null -> {
                     selectedCrime = viewModel.surviveConfigChange!!
+                    viewModel.surviveConfigChange = null
                     bindViews()
                 }
                 it != null -> {
@@ -90,6 +103,16 @@ class CrimeFragment : Fragment() {
         }
 
         fab_id.setOnClickListener{
+            if ( index == -1 && !TextUtils.isEmpty( crime_title.text ) && viewModel.cachedCrime == null )
+            {
+                // Create
+                LoaderManager.getInstance( this ).initLoader( CREATE_CRIME, null, this )
+
+            }else if( index != -1 && viewModel.crimeModified )
+            {
+                //Update
+                LoaderManager.getInstance( this ).initLoader( UPDATE_CRIME, null, this )
+            }
 
         }
     }
@@ -98,23 +121,64 @@ class CrimeFragment : Fragment() {
         super.onDestroy()
         val finishing =  activity?.isFinishing  ?: false
 
-        if ( finishing && viewModel.crimeModified )
+        if ( finishing && viewModel.crimeModified ) // TODO - ALERT DIALOG
         {
-            viewModel.surviveConfigChange = null
-            viewModel.cachedCrime = null
-            viewModel.updateCrime( selectedCrime )
-            Toast.makeText( context, "finishing = $finishing ", Toast.LENGTH_SHORT ).show()
-
-        }else if( finishing && viewModel.cachedCrime == null ){
-
-            viewModel.createCrime()
-
-        }else if( !finishing && viewModel.crimeModified )
-        {
-            Toast.makeText( context, "configChange", Toast.LENGTH_SHORT ).show()
-            viewModel.surviveConfigChange = selectedCrime
+            viewModel.revertEverything()
+            Toast.makeText( context, "UNSAVE CHANGE", Toast.LENGTH_SHORT).show()
         }
 
+        if( !finishing && viewModel.crimeModified ) {
+            viewModel.surviveConfigChange = selectedCrime
+        }
     }
 
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader< Unit > {
+
+        return  object :  AsyncTaskLoader< Unit >( context!! )
+        {
+            override fun loadInBackground() {
+                when (id) {
+                    UPDATE_CRIME -> {
+                        viewModel.updateCrime( selectedCrime )
+
+                    }
+                    CREATE_CRIME -> {
+                        viewModel.createCrime()
+                    }
+                    QUERY_CRIME -> {
+                        viewModel.queryCrimeById( index )
+                    }
+                }
+            }
+
+            override fun onStartLoading() {
+                forceLoad()
+            }
+        }
+    }
+
+    override fun onLoadFinished(loader: Loader<Unit>, data: Unit) {
+        Toast.makeText( context, "onLoadFinished", Toast.LENGTH_SHORT).show()
+
+        if ( loader.id == CREATE_CRIME ) {
+
+            viewModel.revertEverything()
+            activity?.setResult( Activity.RESULT_OK )
+            activity?.finish()
+        }else if ( loader.id == UPDATE_CRIME )
+        {
+            viewModel.revertEverything()
+
+            val intent = Intent()
+            intent.putExtra( INDEX, index )
+
+            activity?.setResult( Activity.RESULT_OK, intent )
+            activity?.finish()
+        }
+    }
+
+    override fun onLoaderReset(loader: Loader<Unit>) {
+        //viewModel.revertEverything()
+        Toast.makeText( context, "onLoaderReset", Toast.LENGTH_SHORT).show()
+    }
 }

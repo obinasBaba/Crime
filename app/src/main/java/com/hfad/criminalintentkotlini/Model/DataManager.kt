@@ -5,9 +5,6 @@ import android.content.Context
 import android.database.Cursor
 import android.database.DataSetObserver
 import android.database.sqlite.SQLiteDatabase
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.loader.app.LoaderManager
 import com.hfad.criminalintentkotlini.Model.Database.CrimeOpenHelper
 import com.hfad.criminalintentkotlini.Model.Database.CrimeDatabaseContract.CrimeEntry
 import com.hfad.criminalintentkotlini.R
@@ -43,9 +40,9 @@ class DataManager private constructor ( ctx : Context )
         CrimeEntry.COLUMN_CRIME_DATE,
         CrimeEntry.COLUMN_CRIME_SOLVED ) }
 
-    fun readBulk( onDataReadyCallback: ( List< Crime > ) -> Unit  ){
+    fun readBulk( onDataReadyCallback : ( ArrayList<Crime> ) -> Unit ): ArrayList<Crime > {
 
-        val crimeList : MutableList< Crime > = ArrayList()
+        val crimeList : ArrayList< Crime > = ArrayList()
         val query: Cursor = readOperation.run {
             query(CrimeEntry.TABLE_NAME, arrayOf,
                 null, null, null, null," ${CrimeEntry.COLUMN_CRIME_TITLE}" )
@@ -59,6 +56,7 @@ class DataManager private constructor ( ctx : Context )
 
         query.close()
         onDataReadyCallback( crimeList )
+        return crimeList
     }
 
     fun queryCrimeById( id : String ) : Crime {
@@ -85,7 +83,7 @@ class DataManager private constructor ( ctx : Context )
 
     fun updateCrimeDb(crimeById: Crime, columnToUpdate: Array<String>) {
 
-        val contentValue : ContentValues = ContentValues()
+        val contentValue = ContentValues()
 
         contentValue.put( CrimeEntry.COLUMN_CRIME_TITLE, crimeById.title )
         contentValue.put( CrimeEntry.COLUMN_CRIME_SOLVED, crimeById.solved)
@@ -116,6 +114,5 @@ class DataManager private constructor ( ctx : Context )
             super.onInvalidated()
             cursorIsValid = false
         }
-
     }
 }
