@@ -8,14 +8,16 @@ import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeListFragment
 import com.hfad.criminalintentkotlini.UI.Fragemnts.RecyclerAdapter
 
-class ActionMode_Imp constructor(val recyclerAdapter: RecyclerAdapter, private val fragment: Fragment )
-
+class ActionModeImplementation(private val recyclerAdapter: RecyclerAdapter,
+                               private val fragment: Fragment )
     : ActionMode.Callback
 {
     override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
 
         when( item?.itemId ){
-            R.id.action_delete -> { (fragment as CrimeListFragment).deleteSelectedItems()  }
+            R.id.action_delete -> {
+                (fragment as CrimeListFragment).deleteSelectedItems()
+            }
             R.id.action_copy -> { }
             R.id.action_forward -> { }
         }

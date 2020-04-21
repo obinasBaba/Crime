@@ -15,7 +15,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.AsyncTaskLoader
-import androidx.loader.content.CursorLoader
 import androidx.loader.content.Loader
 import com.hfad.criminalintentkotlini.Model.Crime
 import com.hfad.criminalintentkotlini.Model.Database.CrimeDatabaseContract.*
@@ -26,8 +25,8 @@ import kotlin.properties.Delegates
 
 const val CHANGED = "changed"
 
-private const val UPDATE_CRIME = 1
-private const val CREATE_CRIME = 2
+ const val UPDATE_CRIME = 1
+ const val CREATE_CRIME = 2
 private const val QUERY_CRIME = 3
 
 class CrimeFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
@@ -121,9 +120,9 @@ class CrimeFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
         super.onDestroy()
         val finishing =  activity?.isFinishing  ?: false
 
-        if ( finishing && viewModel.crimeModified ) // TODO - ALERT DIALOG
+        if ( finishing && viewModel.crimeModified )
         {
-            viewModel.revertEverything()
+            // TODO - ALERT DIALOG
             Toast.makeText( context, "UNSAVE CHANGE", Toast.LENGTH_SHORT).show()
         }
 
@@ -140,10 +139,9 @@ class CrimeFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
                 when (id) {
                     UPDATE_CRIME -> {
                         viewModel.updateCrime( selectedCrime )
-
                     }
                     CREATE_CRIME -> {
-                        viewModel.createCrime()
+                       index = viewModel.createCrime( selectedCrime )
                     }
                     QUERY_CRIME -> {
                         viewModel.queryCrimeById( index )
@@ -160,18 +158,19 @@ class CrimeFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
     override fun onLoadFinished(loader: Loader<Unit>, data: Unit) {
         Toast.makeText( context, "onLoadFinished", Toast.LENGTH_SHORT).show()
 
+        val intent = Intent()
+        intent.putExtra( INDEX, index )
+
         if ( loader.id == CREATE_CRIME ) {
 
-            viewModel.revertEverything()
-            activity?.setResult( Activity.RESULT_OK )
+            intent.putExtra( ACTION, CREATE_CRIME )
+            activity?.setResult( Activity.RESULT_OK, intent )
             activity?.finish()
+
         }else if ( loader.id == UPDATE_CRIME )
         {
-            viewModel.revertEverything()
 
-            val intent = Intent()
-            intent.putExtra( INDEX, index )
-
+            intent.putExtra( ACTION, UPDATE_CRIME )
             activity?.setResult( Activity.RESULT_OK, intent )
             activity?.finish()
         }

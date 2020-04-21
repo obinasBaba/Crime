@@ -21,9 +21,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val toolbar : Toolbar = findViewById(R.id.toolbar_id)
-        setSupportActionBar( toolbar )
-        supportActionBar?.title = resources.getString(R.string.app_name)
+//        val toolbar : Toolbar = findViewById(R.id.toolbar_id)
+//        setSupportActionBar( toolbar )
+//        supportActionBar?.title = resources.getString(R.string.app_name)
+
 
        val fMgr : FragmentManager = supportFragmentManager
         var fragment : Fragment? = fMgr.findFragmentById(R.id.fragment_container_view)

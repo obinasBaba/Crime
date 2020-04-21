@@ -18,7 +18,7 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RecyclerAdapter private constructor (var crimeList: List< Crime >, var sparseBoolean: SparseBooleanArray)
+class RecyclerAdapter(var crimeList: List< Crime >, var sparseBoolean: SparseBooleanArray)
     : RecyclerView.Adapter<RecyclerAdapter.ViewHolder>()
 {
 

@@ -7,8 +7,6 @@ import android.database.DataSetObserver
 import android.database.sqlite.SQLiteDatabase
 import com.hfad.criminalintentkotlini.Model.Database.CrimeOpenHelper
 import com.hfad.criminalintentkotlini.Model.Database.CrimeDatabaseContract.CrimeEntry
-import com.hfad.criminalintentkotlini.R
-import com.hfad.criminalintentkotlini.UI.Fragemnts.RecyclerAdapter
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -88,6 +86,31 @@ class DataManager private constructor ( ctx : Context )
         contentValue.put( CrimeEntry.COLUMN_CRIME_TITLE, crimeById.title )
         contentValue.put( CrimeEntry.COLUMN_CRIME_SOLVED, crimeById.solved)
         writeOperation.update( CrimeEntry.TABLE_NAME, contentValue, CrimeEntry.COLUMN_CRIME_ID + " = ? ", arrayOf( crimeById.id.toString() )  )
+    }
+
+    fun addNewCrime(newCrime : Crime ) : Int
+    {
+        val contentValue = ContentValues()
+
+        contentValue.put( CrimeEntry.COLUMN_CRIME_TITLE, newCrime.title )
+        contentValue.put( CrimeEntry.COLUMN_CRIME_SOLVED, newCrime.solved)
+        contentValue.put( CrimeEntry.COLUMN_CRIME_DATE, newCrime.date.toString() )
+
+        val inserted = writeOperation.insert(CrimeEntry.TABLE_NAME, null, contentValue)
+        return inserted.toInt()
+    }
+
+    fun deleteCrimes( idArray : Array< String > ) : Int
+    {
+
+        repeat( idArray.size ){
+            val id = idArray[ it ]
+            val deletedId = writeOperation.delete(
+                            CrimeEntry.TABLE_NAME,
+                 "${CrimeEntry.COLUMN_CRIME_ID} = ? ", arrayOf( id ) )
+        }
+
+       return 0
     }
 
     private  fun  buildCrime( cursor : Cursor ) : Crime {

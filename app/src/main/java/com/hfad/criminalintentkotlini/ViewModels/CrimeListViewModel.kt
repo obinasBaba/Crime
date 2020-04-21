@@ -29,8 +29,8 @@ class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( appli
      fun readDataFromDatabase() : ArrayList< Crime > =  dataMgr.readBulk{  mutableCursor.postValue( it )  }
 
 
-    fun removeCrime( keyAt: Int) {
-
+    fun removeCrime( ids: Array< String > ) : Int {
+       return dataMgr.deleteCrimes( ids )
     }
 
     fun nullifyDB() {

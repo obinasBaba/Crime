@@ -11,7 +11,7 @@ import com.hfad.criminalintentkotlini.UI.Fragemnts.ClickListeners
 import com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeListFragment
 import kotlin.math.abs
 
-class TouchListener_Imp(
+class TouchListenerImplementation(
     context: Context?,
     val recyclerView: RecyclerView,
     val clickListeners: ClickListeners,

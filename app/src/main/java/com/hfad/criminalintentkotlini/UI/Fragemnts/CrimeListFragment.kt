@@ -1,115 +1,73 @@
 package com.hfad.criminalintentkotlini.UI.Fragemnts
 
-import android.app.Activity
 import android.content.Intent
-import android.database.Cursor
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.loader.app.LoaderManager
-import androidx.loader.content.AsyncTaskLoader
-import androidx.loader.content.CursorLoader
-import androidx.loader.content.Loader
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.hfad.criminalintentkotlini.Model.Crime
 import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
 import com.hfad.criminalintentkotlini.R
-import com.hfad.criminalintentkotlini.UI.ActionMode_Imp
+import com.hfad.criminalintentkotlini.UI.ActionModeImplementation
 import com.hfad.criminalintentkotlini.UI.CrimeActivity
-import com.hfad.criminalintentkotlini.UI.TouchListener_Imp
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.crime_list_fragment.*
-
-const val INDEX = "index"
-const val REQUEST_CODE = 1
-private const val READ_BULK = 1
+import com.hfad.criminalintentkotlini.UI.TouchListenerImplementation
 
 interface ClickListeners{
     fun onClick( pos : Int, view : View )
     fun onLongClick( pos : Int, view : View )
 }
 
-
-
-class CrimeListFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
-{
+class CrimeListFragment : Fragment() {
     companion object {
         fun newInstance() = CrimeListFragment()
     }
 
     private val viewModel: CrimeListViewModel by lazy{ ViewModelProvider( this ).get( CrimeListViewModel::class.java) }
     private lateinit var recyclerView: RecyclerView
-    private lateinit var recyclerAdapter : RecyclerAdapter
+    lateinit var recyclerAdapter : RecyclerAdapter
     private var actionMode : ActionMode? = null
 
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view  = inflater.inflate( R.layout.crime_list_fragment, container, false)
-        recyclerView = view.findViewById( R.id.zRecyclerView )
-
-        val fab = view.findViewById( R.id.fab_id) as FloatingActionButton
-        fab.setOnClickListener{
-            startActivityForResult( Intent( context, CrimeActivity::class.java ), 1 )
-        }
-
-        if ( viewModel.sparseBoolean.size() > 0 )
-            startActionMode( null )
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        recyclerView = inflater.inflate(R.layout.crime_list_fragment, container, false) as RecyclerView
 
         initRecycler()
         implementListeners()
 
-        viewModel.getCrimes().observe( this.viewLifecycleOwner , Observer {
+        if ( viewModel.sparseBoolean.size() > 0 )
+            startActionMode( null )
 
-            recyclerAdapter.changeList( it )
-
-            if ( viewModel.firstTime)
-              viewModel.firstTime = false
-        } )
-
-        LoaderManager.getInstance( this ).initLoader( READ_BULK, null, this)
-
+        return recyclerView;
     }
 
-    private fun implementListeners() {
-        recyclerView.addOnItemTouchListener(TouchListener_Imp(context, recyclerView,
+    private fun implementListeners()
+    {
+        recyclerView.addOnItemTouchListener(
+            TouchListenerImplementation(context, recyclerView,
 
-            object : ClickListeners {
-                override fun onClick(pos: Int, view: View) {
-                    actionMode?.let{ startActionMode(pos) } ?: recyclerAdapter.run {
-                        handleClick( recyclerAdapter.getCrimeId( pos ) )
+                object : ClickListeners {
+                    override fun onClick(pos: Int, view: View) {
+                        actionMode?.run { startActionMode(pos) } ?: handleOnClick(pos, view)
                     }
-                }
-                override fun onLongClick(pos: Int, view: View) { startActionMode(pos) }
-            }, this )
+                    override fun onLongClick(pos: Int, view: View) {
+                        startActionMode(pos)
+                    }
+                }, this)
         )
     }
 
-    private fun initRecycler() {
-        recyclerAdapter = RecyclerAdapter.getInstance( viewModel.getCrimes().value ?: emptyList() , viewModel.sparseBoolean )
-        recyclerView.adapter = recyclerAdapter
-        recyclerView.layoutManager = LinearLayoutManager( requireContext() )
-    }
-
-    private fun handleClick( itemId: Int ) {
+    private fun handleOnClick(pos: Int, view: View ) {
+        Toast.makeText(requireContext(),"OnClick", Toast.LENGTH_SHORT).show()
         val intent = Intent( context, CrimeActivity::class.java )
-        intent.putExtra( INDEX, itemId )
-        startActivityForResult(  intent, REQUEST_CODE )
+        intent.putExtra( "Index", pos )
+        startActivityForResult( intent, 1)
     }
 
     private fun startActionMode( pos : Int? ){
@@ -120,7 +78,8 @@ class CrimeListFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
         if ( actionMode == null && hasMore ){
             //Start actionMode
             actionMode = (activity as AppCompatActivity).startSupportActionMode(
-                ActionMode_Imp( recyclerAdapter, this ))
+                ActionModeImplementation(recyclerAdapter, this )
+            )
         }else if ( actionMode != null && !hasMore ){
             //Last item deselected, stop actionMode
             actionMode?.finish()
@@ -131,7 +90,18 @@ class CrimeListFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
 
     }
 
+    private fun initRecycler() {
+        recyclerAdapter =
+            RecyclerAdapter(
+                viewModel.getCrimes().value as List<Crime>
+                , viewModel.sparseBoolean
+            )
+        recyclerView.adapter = recyclerAdapter
+        recyclerView.layoutManager = LinearLayoutManager( requireContext() )
+    }
+
     fun deleteSelectedItems()  {
+
         actionMode?.finish()
     }
 
@@ -147,50 +117,6 @@ class CrimeListFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if ( requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK )
-        {
-            val index = data?.getIntExtra( INDEX, -1)
-            if ( index != -1 )
-            {
-               viewModel.firstTime = true
-
-            }else{
-                Toast.makeText( context , "Create", Toast.LENGTH_SHORT).show()
-
-            }
-        }
+        Toast.makeText(context, "OnActivityResult", Toast.LENGTH_SHORT).show()
     }
-
-
-    /**                             === === === ===
-     *  --===--- == == == = = >>>> LOADER CALLBACKS  === == = = = == = == == ===========
-     */
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Unit> {
-        Toast.makeText( context , "onCreateLoader", Toast.LENGTH_SHORT).show()
-
-        return object : AsyncTaskLoader< Unit > ( context!! ) {
-            override fun loadInBackground() {
-                if ( id == READ_BULK )
-                    viewModel.readDataFromDatabase()
-            }
-            override fun onStartLoading() {
-
-                if ( viewModel.firstTime ) {
-                    Toast.makeText( context , "onStartLoading", Toast.LENGTH_SHORT).show()
-                    forceLoad()
-                }
-            }
-        }
-    }
-
-    override fun onLoadFinished(loader: Loader<Unit>, data: Unit?) {
-        Toast.makeText( context , "onLoadFinished", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onLoaderReset(loader: Loader<Unit>) {
-        Toast.makeText( context , "onLoaderReset", Toast.LENGTH_SHORT).show()
-    }
-
 }

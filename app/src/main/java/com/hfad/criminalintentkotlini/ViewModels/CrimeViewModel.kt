@@ -1,7 +1,6 @@
 package com.hfad.criminalintentkotlini.ViewModels
 
 import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -46,16 +45,8 @@ class CrimeViewModel(application: Application) : AndroidViewModel(application)
         dataManager.updateCrimeDb(crimeById, changesToUpdate.distinct().toTypedArray() )
     }
 
-    fun createCrime(  ) {
-
-    }
-
-    fun revertEverything(){
-        cachedIndex = -1
-        cachedCrime = null
-        crimeModified = false
-        surviveConfigChange = null
-        changesToUpdate = ArrayList()
+    fun createCrime( selectedCrime: Crime ) : Int  {
+       return dataManager.addNewCrime( selectedCrime )
     }
 
 }
