@@ -9,10 +9,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.hfad.criminalintentkotlini.Model.Crime
+import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.UI.ActionModeImplementation
@@ -36,7 +37,8 @@ class CrimeListFragment : Fragment() {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        recyclerView = inflater.inflate(R.layout.crime_list_fragment, container, false) as RecyclerView
+        val view  = inflater.inflate(R.layout.crime_list_fragment, container, false)
+        recyclerView = view.findViewById( R.id.zRecyclerView )
 
         initRecycler()
         implementListeners()
@@ -44,7 +46,15 @@ class CrimeListFragment : Fragment() {
         if ( viewModel.sparseBoolean.size() > 0 )
             startActionMode( null )
 
-        return recyclerView;
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewModel.crimeList.observe( viewLifecycleOwner, Observer {
+            recyclerAdapter.changeList( it )
+        })
     }
 
     private fun implementListeners()
@@ -64,10 +74,10 @@ class CrimeListFragment : Fragment() {
     }
 
     private fun handleOnClick(pos: Int, view: View ) {
-        Toast.makeText(requireContext(),"OnClick", Toast.LENGTH_SHORT).show()
-        val intent = Intent( context, CrimeActivity::class.java )
-        intent.putExtra( "Index", pos )
-        startActivityForResult( intent, 1)
+//        Toast.makeText(requireContext(),"OnClick", Toast.LENGTH_SHORT).show()
+//        val intent = Intent( context, CrimeActivity::class.java )
+//        intent.putExtra( "Index", pos )
+//        startActivityForResult( intent, 1)
     }
 
     private fun startActionMode( pos : Int? ){
@@ -91,9 +101,8 @@ class CrimeListFragment : Fragment() {
     }
 
     private fun initRecycler() {
-        recyclerAdapter =
-            RecyclerAdapter(
-                viewModel.getCrimes().value as List<Crime>
+        recyclerAdapter = RecyclerAdapter(
+                viewModel.crimeList.value ?: emptyList()
                 , viewModel.sparseBoolean
             )
         recyclerView.adapter = recyclerAdapter
@@ -101,7 +110,6 @@ class CrimeListFragment : Fragment() {
     }
 
     fun deleteSelectedItems()  {
-
         actionMode?.finish()
     }
 
@@ -112,7 +120,6 @@ class CrimeListFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.nullifyDB()
         viewModel.sparseBoolean = recyclerAdapter.sparseBoolean
     }
 

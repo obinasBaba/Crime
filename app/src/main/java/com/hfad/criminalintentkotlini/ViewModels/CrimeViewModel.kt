@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.hfad.criminalintentkotlini.Model.Crime
+import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.Model.DataManager
 
 //Will survive config changes
@@ -45,7 +45,7 @@ class CrimeViewModel(application: Application) : AndroidViewModel(application)
         dataManager.updateCrimeDb(crimeById, changesToUpdate.distinct().toTypedArray() )
     }
 
-    fun createCrime( selectedCrime: Crime ) : Int  {
+    fun createCrime( selectedCrime: Crime) : Int  {
        return dataManager.addNewCrime( selectedCrime )
     }
 

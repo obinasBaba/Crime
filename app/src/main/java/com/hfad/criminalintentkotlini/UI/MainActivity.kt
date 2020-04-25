@@ -12,7 +12,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeListFragment
-import com.hfad.criminalintentkotlini.UI.Fragemnts.REQUEST_CODE
 
 const val TAG : String = "MAIN"
 class MainActivity : AppCompatActivity() {
@@ -40,19 +39,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onActivityResult( requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if ( resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE ) {
-            Toast.makeText( this, "notifyDataSetChanged", Toast.LENGTH_SHORT).show()
-
-        }
-
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-
-    }
 }

@@ -1,6 +1,5 @@
 package com.hfad.criminalintentkotlini.UI.Fragemnts
 
-import android.database.Cursor
 import android.graphics.Color
 import android.util.Log
 import android.util.SparseBooleanArray
@@ -10,21 +9,20 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.hfad.criminalintentkotlini.Model.Crime
+import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.UI.TAG
-import java.lang.IllegalStateException
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RecyclerAdapter(var crimeList: List< Crime >, var sparseBoolean: SparseBooleanArray)
+class RecyclerAdapter(var crimeList: List<Crime>, var sparseBoolean: SparseBooleanArray)
     : RecyclerView.Adapter<RecyclerAdapter.ViewHolder>()
 {
 
     companion object {
         private var INSTANCE : RecyclerAdapter? = null
-        fun getInstance( cursor: List< Crime >, sparseBoolean: SparseBooleanArray ) : RecyclerAdapter  =
+        fun getInstance(cursor: List<Crime>, sparseBoolean: SparseBooleanArray ) : RecyclerAdapter  =
             INSTANCE ?: RecyclerAdapter( cursor , sparseBoolean ).also {
                 INSTANCE = it
             }
@@ -36,14 +34,14 @@ class RecyclerAdapter(var crimeList: List< Crime >, var sparseBoolean: SparseBoo
         var solvedImage: ImageView = view.findViewById(R.id.solved_img)
         var dateLabel: TextView = view.findViewById(R.id.dateText_id)
 
-        fun bind( crime : Crime, position: Int ) {
+        fun bind(crime : Crime, position: Int ) {
 
             view.setBackgroundColor(if (sparseBoolean.get( position )) 0x9934B5E4.toInt() else Color.TRANSPARENT);
 
             // TODO - Change to proper date
             val crimeDate: DateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-            if (crime.solved) solvedImage.visibility = ImageView.VISIBLE
+            if (crime.solved!!) solvedImage.visibility = ImageView.VISIBLE
             else solvedImage.visibility = ImageView.GONE
             dateLabel.text = crimeDate.format( Date())
             crimetitle.text = crime.title

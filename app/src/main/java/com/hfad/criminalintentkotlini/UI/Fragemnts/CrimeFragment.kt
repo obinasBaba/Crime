@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.AsyncTaskLoader
 import androidx.loader.content.Loader
-import com.hfad.criminalintentkotlini.Model.Crime
+import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.Model.Database.CrimeDatabaseContract.*
 import com.hfad.criminalintentkotlini.ViewModels.CrimeViewModel
 import com.hfad.criminalintentkotlini.R
@@ -24,7 +24,7 @@ import kotlinx.android.synthetic.main.crime_fragment.*
 import kotlin.properties.Delegates
 
 const val CHANGED = "changed"
-
+const val ACTION = "action"
  const val UPDATE_CRIME = 1
  const val CREATE_CRIME = 2
 private const val QUERY_CRIME = 3
@@ -36,7 +36,7 @@ class CrimeFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
     }
 
     private val viewModel: CrimeViewModel by lazy{ ViewModelProvider( this ).get( CrimeViewModel::class.java) }
-    private var selectedCrime by Delegates.observable( Crime() ) { _, _, newCrime ->
+    private var selectedCrime by Delegates.observable(Crime()) { _, _, newCrime ->
         if ( viewModel.cachedCrime != null ){
 
             viewModel.crimeModified = !( newCrime equals viewModel.cachedCrime )
@@ -54,7 +54,7 @@ class CrimeFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
 
     override fun onActivityCreated(savedInstanceState: Bundle?) { super.onActivityCreated(savedInstanceState)
 
-        index = activity?.intent?.getIntExtra( INDEX, -1 )!!
+        index = activity?.intent?.getIntExtra( "INDEX", -1 )!!
         if ( index != -1 )
             LoaderManager.getInstance( this ).initLoader( QUERY_CRIME, null, this )
 
@@ -67,7 +67,9 @@ class CrimeFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
                     bindViews()
                 }
                 it != null -> {
-                    selectedCrime = Crime( it.id, it.title, it.solved, it.date )
+                    selectedCrime =
+                        Crime(it.id, it.title, it.solved, it.date
+                        )
                     bindViews()
                 }
             }
@@ -77,7 +79,7 @@ class CrimeFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
     private fun bindViews() {
         crime_title.setText(selectedCrime.title)
         crime_date.text = selectedCrime.date.toString()
-        crime_solved.isChecked = selectedCrime.solved
+        crime_solved.isChecked = selectedCrime.solved ?: false
     }
 
     override fun onStart() {
@@ -159,7 +161,7 @@ class CrimeFragment : Fragment(), LoaderManager.LoaderCallbacks< Unit >
         Toast.makeText( context, "onLoadFinished", Toast.LENGTH_SHORT).show()
 
         val intent = Intent()
-        intent.putExtra( INDEX, index )
+        intent.putExtra( "INDEX", index )
 
         if ( loader.id == CREATE_CRIME ) {
 
