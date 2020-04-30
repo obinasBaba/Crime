@@ -1,42 +1,60 @@
 package com.hfad.criminalintentkotlini.UI
 
-import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
 import com.hfad.criminalintentkotlini.R
+import com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeDetailFragment
 import com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeListFragment
 
 const val TAG : String = "MAIN"
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() , OnClickCallBack
+{
+    companion object{
+        const val SELECTED_CRIME_ID_KEY = "incoming crime id"
+    }
+
+    private lateinit var mFragmentManager : FragmentManager
+    private val crimeListFragInstance : CrimeListFragment by lazy { CrimeListFragment.newInstance() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        val toolbar : Toolbar = findViewById(R.id.toolbar_id)
-//        setSupportActionBar( toolbar )
-//        supportActionBar?.title = resources.getString(R.string.app_name)
+        mFragmentManager = supportFragmentManager
 
+        val fragmentTransaction = mFragmentManager.beginTransaction()
+        fragmentTransaction.replace( R.id.fragment_container_view, crimeListFragInstance )
+        fragmentTransaction.addToBackStack( crimeListFragInstance.tag )
+        fragmentTransaction.commit()
 
-       val fMgr : FragmentManager = supportFragmentManager
-        var fragment : Fragment? = fMgr.findFragmentById(R.id.fragment_container_view)
-
-        if ( fragment == null )
-        {
-            Log.d(TAG, "in let" )
-            fragment = CrimeListFragment.newInstance()
-            val fragTransaction : FragmentTransaction = fMgr.beginTransaction()
-            fragTransaction.add(R.id.fragment_container_view, fragment  )
-            fragTransaction.setTransition( FragmentTransaction.TRANSIT_FRAGMENT_FADE )
-            fragTransaction.commit()
-        }
     }
 
+    override fun itemSelected(crimeId: Int) {
+        Toast.makeText( this, "onClick", Toast.LENGTH_SHORT ).show()
+
+        val crimeDetailFragInstance = CrimeDetailFragment.newInstance( crimeId )
+        val fragmentTransaction = mFragmentManager.beginTransaction()
+
+        fragmentTransaction.hide( crimeListFragInstance )
+        fragmentTransaction.add(R.id.fragment_container_view, crimeDetailFragInstance )
+        fragmentTransaction.addToBackStack( crimeDetailFragInstance.tag )
+        fragmentTransaction.commit()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+}
+
+
+interface OnClickCallBack {
+    fun itemSelected(crimeId: Int)
 }

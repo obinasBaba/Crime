@@ -16,7 +16,7 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RecyclerAdapter(var crimeList: List<Crime>, var sparseBoolean: SparseBooleanArray)
+class RecyclerAdapter(var crimeList: List<Crime>, var sparseBoolean: SparseBooleanArray )
     : RecyclerView.Adapter<RecyclerAdapter.ViewHolder>()
 {
 
@@ -32,7 +32,7 @@ class RecyclerAdapter(var crimeList: List<Crime>, var sparseBoolean: SparseBoole
 
         var crimetitle: TextView = view.findViewById(R.id.sup_id)
         var solvedImage: ImageView = view.findViewById(R.id.solved_img)
-        var dateLabel: TextView = view.findViewById(R.id.dateText_id)
+        var dateLabel: TextView = view.findViewById(R.id.createdDate_id)
 
         fun bind(crime : Crime, position: Int ) {
 
@@ -92,6 +92,10 @@ class RecyclerAdapter(var crimeList: List<Crime>, var sparseBoolean: SparseBoole
     fun removeSelection() {
         sparseBoolean = SparseBooleanArray()
         notifyDataSetChanged()
+    }
+
+    fun getCrimeAtIndex(pos: Int): Crime {
+        return crimeList[pos]
     }
 
 }

@@ -1,4 +1,6 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:padding="2dp"
     android:layout_margin="1dp"
@@ -6,7 +8,6 @@
 
 
     <androidx.cardview.widget.CardView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/cardView_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,35 +32,99 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="4dp"
                 android:layout_marginRight="4dp"
+                android:cursorVisible="false"
+                android:editable="false"
                 android:text="@string/Sup"
+                android:textAllCaps="false"
+                android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@+id/solved_img"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
 
-            <TextView
-                android:id="@+id/dateText_id"
-                style="@style/TextAppearance.AppCompat.Body1"
-                android:layout_width="0dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout"
+                android:layout_width="0dp "
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="4dp"
-                android:layout_marginRight="4dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/Sup"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:orientation="vertical"
                 app:layout_constraintEnd_toStartOf="@+id/solved_img"
+                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/sup_id" />
+                app:layout_constraintTop_toBottomOf="@+id/sup_id">
+
+
+                <TextView
+                    android:id="@+id/createdDate_id"
+                    style="@style/TextAppearance.AppCompat.Body1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="8dp"
+                    android:alpha=".8"
+                    android:typeface="monospace"
+                    app:fontFamily="monospace"
+                    app:layout_constraintStart_toEndOf="@+id/createDate"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="@string/noDate" />
+
+                <TextView
+                    android:id="@+id/createDate"
+                    style="@style/TextAppearance.AppCompat.Body1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:alpha=".8"
+                    android:text="@string/createdDate"
+                    android:typeface="monospace"
+                    app:fontFamily="monospace"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/updatedDate_id"
+                    style="@style/TextAppearance.AppCompat.Body1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="3dp"
+                    android:alpha=".8"
+                    android:text="@string/noDate"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/createdDate_id"
+                    app:layout_constraintStart_toEndOf="@+id/updatedDate"
+                    app:layout_constraintTop_toBottomOf="@+id/createdDate_id" />
+
+                <TextView
+                    android:id="@+id/updatedDate"
+                    style="@style/TextAppearance.AppCompat.Body1"
+                    android:layout_width="129dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="3dp"
+                    android:alpha=".8"
+                    android:text="@string/LastModifed"
+                    app:fontFamily="monospace"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/createDate" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <ImageView
                 android:id="@+id/solved_img"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="5dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginBottom="8dp"
@@ -70,9 +135,9 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_hand" />
 
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>
-
-
 </FrameLayout>

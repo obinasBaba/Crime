@@ -7,8 +7,9 @@ import java.util.*
 data class Crime (@PrimaryKey( autoGenerate = true ) val id : Int? = null,
                              @ColumnInfo(name = "title")var title : String = "No Title",
                              var solved : Boolean? = false,
-                             var date : Date? = null)
-//                             var lastUpdated : Date? = null )
+                             var date : Date? = null,
+                             var lastUpdated : Date? = null,
+                             var description : String? = null )
 {
    override infix fun equals(other: Any?): Boolean {
        val otherCrime =  other as? Crime

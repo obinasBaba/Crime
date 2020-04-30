@@ -10,4 +10,7 @@
     <string name="copy">Copy</string>
     <string name="forward">Forward</string>
     <string name="Sup">sup</string>
+    <string name="LastModifed">"Last Modified - "</string>
+    <string name="noDate">" Undefended "</string>
+    <string name="createdDate">"Create Date - "</string>
 </resources>
