@@ -94,6 +94,7 @@ class CrimeListFragment : Fragment() {
         )
     }
 
+
     private fun onCrimeSelected(crimeRealId: Int, view: View) {
         val actionToCrimeDetailFragment : NavDirections =
             CrimeListFragmentDirections.actionCrimeListFragmentToCrimeDetailFragment( crimeRealId )
