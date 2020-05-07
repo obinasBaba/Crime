@@ -1,6 +1,5 @@
 package com.hfad.criminalintentkotlini.UI.Fragemnts
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.SparseBooleanArray
@@ -10,15 +9,18 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.core.util.size
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.createViewModelLazy
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavDirections
+import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.UI.ActionModeImplementation
-import com.hfad.criminalintentkotlini.UI.OnClickCallBack
 import com.hfad.criminalintentkotlini.UI.TouchListenerImplementation
 import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
 import kotlinx.android.synthetic.main.crime_list_fragment.*
@@ -29,22 +31,14 @@ interface ClickListeners {
 }
 
 class CrimeListFragment : Fragment() {
-    private lateinit var recyclerView: RecyclerView
-    var recyclerAdapter: RecyclerAdapter = RecyclerAdapter( emptyList(), SparseBooleanArray() )
-    private var actionMode: ActionMode? = null
-    private lateinit var CrimeSelectedCallBack: OnClickCallBack
 
-    private val viewModel: CrimeListViewModel by lazy {
-        ViewModelProvider(this).get(CrimeListViewModel::class.java)
-    }
+    var recyclerAdapter: RecyclerAdapter = RecyclerAdapter( emptyList(), SparseBooleanArray() )
+    private val viewModel by activityViewModels<CrimeListViewModel>(  )
+    private lateinit var recyclerView: RecyclerView
+    private var actionMode: ActionMode? = null
+
     companion object {
         fun newInstance() = CrimeListFragment()
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        CrimeSelectedCallBack = context as? OnClickCallBack  ?:
-                throw IllegalStateException( "Hosting activity should implement " )
     }
 
     ///Initializing Views only
@@ -71,6 +65,9 @@ class CrimeListFragment : Fragment() {
         viewModel.crimeList.observe( viewLifecycleOwner, Observer {
             recyclerAdapter.changeList( it )
         } )
+
+        fab_id.setOnClickListener(
+            Navigation.createNavigateOnClickListener( R.id.action_crimeListFragment_to_crimeDetailFragment ) )
     }
 
     private fun initRecycler() {
@@ -89,7 +86,6 @@ class CrimeListFragment : Fragment() {
                             startActionMode(pos)
                         } ?: onCrimeSelected(crimeRealId, view)
                     }
-
                     override fun onLongClick(pos: Int, view: View) {
                         startActionMode(pos)
                     }
@@ -98,8 +94,10 @@ class CrimeListFragment : Fragment() {
         )
     }
 
-    private fun onCrimeSelected(crimeId: Int, view: View ) {
-        CrimeSelectedCallBack.itemSelected( crimeId )
+    private fun onCrimeSelected(crimeRealId: Int, view: View) {
+        val actionToCrimeDetailFragment : NavDirections =
+            CrimeListFragmentDirections.actionCrimeListFragmentToCrimeDetailFragment( crimeRealId )
+        findNavController().navigate( actionToCrimeDetailFragment )
     }
 
     private fun startActionMode(pos: Int?) {
@@ -126,6 +124,8 @@ class CrimeListFragment : Fragment() {
 
     fun nullifyActionMode() {
         if (actionMode != null) actionMode = null
+
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -136,5 +136,4 @@ class CrimeListFragment : Fragment() {
         super.onDestroy()
         viewModel.sparseBoolean = recyclerAdapter.sparseBoolean
     }
-
 }

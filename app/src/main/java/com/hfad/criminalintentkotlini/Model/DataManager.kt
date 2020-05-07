@@ -37,8 +37,8 @@ class DataManager private constructor ( val ctx : Application )
         }.execute( id ).get()
     }
 
-    fun updateCrimeDb( crimeById: Crime ) {
-         object : AsyncTask< Crime , Void,  Int >(){
+    fun updateCrimeDb( crimeById: Crime ): Int {
+        return object : AsyncTask< Crime , Void,  Int >(){
             override fun doInBackground(vararg params: Crime?) : Int {
                 return crimeDao.update( params.first()!! )
             }

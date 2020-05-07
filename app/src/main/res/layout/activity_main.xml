@@ -1,12 +1,22 @@
-<FrameLayout android:id="@+id/fragment_container_view"
+<androidx.constraintlayout.widget.ConstraintLayout
+
+    android:id="@+id/fragment_container_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="10dp"
     tools:context=".UI.MainActivity"
-    tools:showIn="@layout/crime_list_fragment"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-</FrameLayout>
+    <fragment
+        android:id="@+id/main_host_frag"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/main_nav"
+        tools:ignore="FragmentTagUsage" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

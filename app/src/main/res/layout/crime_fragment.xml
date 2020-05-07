@@ -22,8 +22,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_conversion_absoluteHeight="32dp"
-        tools:layout_conversion_absoluteWidth="379dp" />
+        />
 
     <EditText
         android:id="@+id/crime_title"
@@ -95,16 +94,13 @@
         android:id="@+id/fab_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="7dp"
+        android:visibility="gone"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_arrow_back_24dp"
-        tools:ignore="PrivateResource"
-        tools:layout_conversion_absoluteHeight="56dp"
-        tools:layout_conversion_absoluteWidth="56dp" />
+        app:backgroundTint="#E19F1A"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

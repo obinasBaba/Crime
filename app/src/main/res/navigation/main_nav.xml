@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/main_nav"
+    app:startDestination="@id/crimeListFragment">
+
+    <fragment
+        android:id="@+id/crimeListFragment"
+        android:name="com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeListFragment"
+        android:label="CrimeListFragment" >
+        <action
+            android:id="@+id/action_crimeListFragment_to_crimeDetailFragment"
+            app:destination="@id/crimeDetailFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/crimeDetailFragment"
+        android:name="com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeDetailFragment"
+        android:label="CrimeDetailFragment" >
+        <argument
+            android:name="selectedCrimeId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
+</navigation>
