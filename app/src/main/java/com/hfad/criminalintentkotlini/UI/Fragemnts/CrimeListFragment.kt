@@ -98,6 +98,7 @@ class CrimeListFragment : Fragment() {
         val actionToCrimeDetailFragment : NavDirections =
             CrimeListFragmentDirections.actionCrimeListFragmentToCrimeDetailFragment( crimeRealId )
         findNavController().navigate( actionToCrimeDetailFragment )
+
     }
 
     private fun startActionMode(pos: Int?) {
