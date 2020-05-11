@@ -32,11 +32,8 @@ class RecyclerAdapter( var sparseBoolean: SparseBooleanArray )
 
     init {
         asyncListDiffer.addListListener ( object : AsyncListDiffer.ListListener< Crime > {
-            override fun onCurrentListChanged(
-                previousList: MutableList<Crime>,
-                currentList: MutableList<Crime>
-            ) {
-
+            override fun onCurrentListChanged( previousList: MutableList<Crime>,
+                                               currentList: MutableList<Crime>) {
 
                 currentList.asSequence().filterNot { currentCrime ->
                      currentCrime in previousList

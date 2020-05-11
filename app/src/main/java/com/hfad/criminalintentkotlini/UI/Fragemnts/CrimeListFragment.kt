@@ -21,10 +21,11 @@ import com.hfad.criminalintentkotlini.Util.*
 import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
 import kotlinx.android.synthetic.main.crime_list_fragment.*
 
-private const val ITEM_TOP_PADDING: Int = 5
+
 
 class CrimeListFragment : Fragment() {
 
+    private val ITEM_TOP_PADDING: Int = 5
 
     val recyclerAdapter: RecyclerAdapter by lazy { RecyclerAdapter( SparseBooleanArray() ) }
 
