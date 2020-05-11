@@ -20,5 +20,20 @@
             android:name="selectedCrimeId"
             app:argType="integer"
             android:defaultValue="-1" />
+        <action
+            android:id="@+id/action_crimeDetailFragment_to_timeStampFragment"
+            app:destination="@id/timeStampFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/timeStampFragment"
+        android:name="com.hfad.criminalintentkotlini.UI.Fragemnts.TimeStampFragment"
+        android:label="TimeStampFragment" >
+        <action
+            android:id="@+id/action_timeStampFragment_to_crimeDetailFragment"
+            app:destination="@id/crimeDetailFragment" />
+        <argument
+            android:name="lastModifiedDate"
+            app:argType="java.util.Date"
+            app:nullable="true" />
     </fragment>
 </navigation>
