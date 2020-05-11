@@ -8,7 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.Model.DataManager
-import com.hfad.criminalintentkotlini.UI.Fragemnts.RecyclerAdapter
+import com.hfad.criminalintentkotlini.Util.RecyclerAdapter
 
 class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( applicationCtx ) {
 
@@ -52,7 +52,7 @@ class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( appli
         }
     }
 
-    fun deleteCrimes(adapter : RecyclerAdapter ){
+    fun deleteCrimes(adapter: RecyclerAdapter){
         val willBeDeleted : MutableList< Crime > = ArrayList( )
         val size = sparseBoolean.size()
         IntRange( 0, size ).forEach { index ->

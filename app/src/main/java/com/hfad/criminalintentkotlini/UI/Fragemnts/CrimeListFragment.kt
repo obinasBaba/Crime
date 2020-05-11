@@ -11,91 +11,84 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.createViewModelLazy
 import androidx.lifecycle.Observer
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.hfad.criminalintentkotlini.R
-import com.hfad.criminalintentkotlini.UI.ActionModeImplementation
-import com.hfad.criminalintentkotlini.UI.TouchListenerImplementation
+import com.hfad.criminalintentkotlini.Util.*
 import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
 import kotlinx.android.synthetic.main.crime_list_fragment.*
 
-interface ClickListeners {
-    fun onClick(pos: Int, view: View)
-    fun onLongClick(pos: Int, view: View)
-}
+private const val ITEM_TOP_PADDING: Int = 5
 
 class CrimeListFragment : Fragment() {
 
-    var recyclerAdapter: RecyclerAdapter = RecyclerAdapter( emptyList(), SparseBooleanArray() )
-    private val viewModel by activityViewModels<CrimeListViewModel>(  )
-    private lateinit var recyclerView: RecyclerView
-    private var actionMode: ActionMode? = null
 
-    companion object {
-        fun newInstance() = CrimeListFragment()
-    }
+    val recyclerAdapter: RecyclerAdapter by lazy { RecyclerAdapter( SparseBooleanArray() ) }
+
+    private val viewModel by activityViewModels<CrimeListViewModel>(  )
+//    private lateinit var recyclerView: RecyclerView
+    private var actionMode: ActionMode? = null
 
     ///Initializing Views only
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.crime_list_fragment, container, false)
-        recyclerView = view.findViewById(R.id.zRecyclerView)
-        return view
+        return inflater.inflate(R.layout.crime_list_fragment, container, false)
     }
 
     ///Initializing necessary references
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initRecycler()
-        implementListeners()
+        setUpRecyclerView()
 
         viewModel.sparseBoolean.apply {
             if ( size() > 0 ) {
                 recyclerAdapter.sparseBoolean = this
                 startActionMode( null )
+                Toast.makeText( requireContext(), "", Toast.LENGTH_SHORT ).show()
             }
         }
 
         viewModel.crimeList.observe( viewLifecycleOwner, Observer {
-            recyclerAdapter.changeList( it )
+            recyclerAdapter.submitList( it )
+
+            recyclerAdapter.scrollToPosition { newCrimeIndex ->
+                zRecyclerView.smoothScrollToPosition( newCrimeIndex )
+            }
         } )
 
-        fab_id.setOnClickListener(
-            Navigation.createNavigateOnClickListener( R.id.action_crimeListFragment_to_crimeDetailFragment ) )
+        fab_id.setOnClickListener( Navigation.createNavigateOnClickListener( R.id.action_crimeListFragment_to_crimeDetailFragment ) )
     }
 
-    private fun initRecycler() {
-        recyclerView.adapter = recyclerAdapter
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-    }
-
-    private fun implementListeners() {
-        recyclerView.addOnItemTouchListener(
-            TouchListenerImplementation(context, recyclerView,
-
-                object : ClickListeners {
-                    override fun onClick(pos: Int, view: View) {
-                        val crimeRealId = recyclerAdapter.getCrimeId(pos)!!
-                        actionMode?.run {
-                            startActionMode(pos)
-                        } ?: onCrimeSelected(crimeRealId, view)
-                    }
-                    override fun onLongClick(pos: Int, view: View) {
-                        startActionMode(pos)
-                    }
-                }, this
+    private fun setUpRecyclerView() {
+        zRecyclerView.apply {
+            adapter = recyclerAdapter  // Adapter
+            layoutManager = LinearLayoutManager(requireContext())
+            addItemDecoration( ItemDecorationImp( ITEM_TOP_PADDING ) )  // ItemDecoration for Top Padding
+            addOnItemTouchListener(
+                TouchListenerImplementation(
+                    requireContext(), this, implementListeners(), this@CrimeListFragment
+                )
             )
-        )
+        }
     }
 
+    private fun implementListeners() : ClickListeners = object :
+        ClickListeners {
+            override fun onClick(pos: Int, view: View) {
+                val crimeRealId = recyclerAdapter.getCrimeId(pos)!!
+                actionMode?.run {
+                    startActionMode(pos)
+                } ?: onCrimeSelected(crimeRealId )
+            }
+            override fun onLongClick(pos: Int, view: View) {
+                startActionMode( pos )
+            }
+        }
 
-    private fun onCrimeSelected(crimeRealId: Int, view: View) {
+    private fun onCrimeSelected( crimeRealId: Int ) {
         val actionToCrimeDetailFragment : NavDirections =
             CrimeListFragmentDirections.actionCrimeListFragmentToCrimeDetailFragment( crimeRealId )
         findNavController().navigate( actionToCrimeDetailFragment )
@@ -108,7 +101,11 @@ class CrimeListFragment : Fragment() {
         if (actionMode == null && hasMore) {
             //Start actionMode
             actionMode = (activity as AppCompatActivity).startSupportActionMode(
-                ActionModeImplementation(recyclerAdapter, this))
+                ActionModeImplementation(
+                    recyclerAdapter,
+                    this
+                )
+            )
 
         } else if (actionMode != null && !hasMore) {
             //Last item deselected, stop actionMode
@@ -125,8 +122,6 @@ class CrimeListFragment : Fragment() {
 
     fun nullifyActionMode() {
         if (actionMode != null) actionMode = null
-
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

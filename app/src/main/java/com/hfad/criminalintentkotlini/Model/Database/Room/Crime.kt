@@ -16,6 +16,7 @@ data class Crime (@PrimaryKey( autoGenerate = true ) val id : Int? = null,
            ?: return false
        return this.title == otherCrime.title &&
                this.solved == otherCrime.solved &&
+               this.id == otherCrime.id &&
                this.date == otherCrime.date
     }
 

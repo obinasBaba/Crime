@@ -96,6 +96,8 @@ class CrimeDetailFragment : Fragment()
         requireActivity().onBackPressedDispatcher.addCallback( viewLifecycleOwner  ){
             onBackPressed()
         }
+
+
     }
 
     override fun onDestroy() {

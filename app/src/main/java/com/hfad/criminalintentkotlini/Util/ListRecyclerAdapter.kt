@@ -1,4 +1,4 @@
-package com.hfad.criminalintentkotlini.UI.Fragemnts
+package com.hfad.criminalintentkotlini.Util
 
 import android.graphics.Color
 import android.util.Log
@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.R
@@ -15,20 +17,22 @@ import com.hfad.criminalintentkotlini.UI.TAG
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
-class RecyclerAdapter(var crimeList: List<Crime>, var sparseBoolean: SparseBooleanArray )
-    : RecyclerView.Adapter<RecyclerAdapter.ViewHolder>()
+class ItemCallback : DiffUtil.ItemCallback< Crime >() {
+
+    override fun areItemsTheSame(oldItem: Crime, newItem: Crime): Boolean
+            = oldItem equals newItem
+
+    override fun areContentsTheSame(oldItem: Crime, newItem: Crime): Boolean
+            = oldItem equals newItem
+}
+
+class ListRecyclerAdapter( var crimeList: ArrayList< Crime >, var sparseBoolean: SparseBooleanArray )
+            : ListAdapter<Crime, ListRecyclerAdapter.ViewHolder>( ItemCallback() )
 {
 
-    companion object {
-        private var INSTANCE : RecyclerAdapter? = null
-        fun getInstance(cursor: List<Crime>, sparseBoolean: SparseBooleanArray ) : RecyclerAdapter  =
-            INSTANCE ?: RecyclerAdapter( cursor , sparseBoolean ).also {
-                INSTANCE = it
-            }
-    }
-
-    inner class ViewHolder( private val view: View ) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder( private val view: View) : RecyclerView.ViewHolder(view) {
 
         var crimetitle: TextView = view.findViewById(R.id.sup_id)
         var solvedImage: ImageView = view.findViewById(R.id.solved_img)
@@ -49,32 +53,26 @@ class RecyclerAdapter(var crimeList: List<Crime>, var sparseBoolean: SparseBoole
 
     }
 
-    fun getCrimeId( pos : Int ) = crimeList[ pos ].id
-
-    override fun getItemCount() : Int = crimeList.size
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         Log.d(TAG, "OnCreateView")
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.single_row, parent, false))
     }
 
-    override fun onBindViewHolder( holder: ViewHolder, position : Int ) {
+    override fun onBindViewHolder(holder: ViewHolder, position : Int ) {
         Log.d(TAG, "OnBIndView")
         holder.bind( crimeList[ position ], position )
     }
 
-    fun changeList( list: List<Crime> ) {
-        this.crimeList = list
-        notifyDataSetChanged()
+    override fun submitList(list: MutableList<Crime>?) {
+        super.submitList(list)
     }
 
-    /**
-     *  ======================== Class Util Methods========================== >
-     */
+    override fun getItemCount() : Int = crimeList.size
 
+    fun getCrimeId( pos : Int ) = crimeList[ pos ].id
 
     /**
-        ==================== Action_Mode Methods =========================== >
+    ==================== Action_Mode Methods =========================== >
      */
 
     fun toggleSelection(pos: Int) {
@@ -97,6 +95,4 @@ class RecyclerAdapter(var crimeList: List<Crime>, var sparseBoolean: SparseBoole
     fun getCrimeAtIndex(pos: Int): Crime {
         return crimeList[pos]
     }
-
 }
-
