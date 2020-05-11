@@ -1,4 +1,4 @@
-package com.hfad.criminalintentkotlini.UI
+package com.hfad.criminalintentkotlini.Util
 
 import android.content.Context
 import android.util.Log
@@ -7,8 +7,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.recyclerview.widget.*
-import com.hfad.criminalintentkotlini.UI.Fragemnts.ClickListeners
 import com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeListFragment
+import com.hfad.criminalintentkotlini.UI.TAG
 import kotlin.math.abs
 
 class TouchListenerImplementation(

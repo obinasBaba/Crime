@@ -1,4 +1,4 @@
-package com.hfad.criminalintentkotlini.UI
+package com.hfad.criminalintentkotlini.Util
 
 import android.content.Context
 import android.util.AttributeSet

@@ -1,4 +1,4 @@
-package com.hfad.criminalintentkotlini.UI
+package com.hfad.criminalintentkotlini.Util
 
 import android.view.Menu
 import android.view.MenuItem
@@ -6,7 +6,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.fragment.app.Fragment
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeListFragment
-import com.hfad.criminalintentkotlini.UI.Fragemnts.RecyclerAdapter
+import com.hfad.criminalintentkotlini.Util.RecyclerAdapter
 
 class ActionModeImplementation(private val recyclerAdapter: RecyclerAdapter,
                                private val fragment: Fragment )
