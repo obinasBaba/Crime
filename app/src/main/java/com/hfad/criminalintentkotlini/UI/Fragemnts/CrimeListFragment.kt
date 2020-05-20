@@ -15,7 +15,10 @@ import androidx.lifecycle.Observer
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.Util.*
 import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
@@ -56,7 +59,7 @@ class CrimeListFragment : Fragment() {
             recyclerAdapter.submitList( it )
 
             recyclerAdapter.scrollToPosition { newCrimeIndex ->
-                zRecyclerView.smoothScrollToPosition( newCrimeIndex )
+               // zRecyclerView.smoothScrollToPosition( newCrimeIndex )
             }
         } )
 
@@ -64,17 +67,45 @@ class CrimeListFragment : Fragment() {
     }
 
     private fun setUpRecyclerView() {
-        zRecyclerView.apply {
+        zRecyclerView.apply insideRecyclerView@{
             adapter = recyclerAdapter  // Adapter
             layoutManager = LinearLayoutManager(requireContext())
-            addItemDecoration( ItemDecorationImp( ITEM_TOP_PADDING ) )  // ItemDecoration for Top Padding
+            addItemDecoration( ItemDecorationImp( ITEM_TOP_PADDING ) )
+//            addItemDecoration( ItemTouchHelper( supportSwipeToDelete() ))
             addOnItemTouchListener(
                 TouchListenerImplementation(
                     requireContext(), this, implementListeners(), this@CrimeListFragment
                 )
             )
+
+            with( ItemTouchHelper(  supportSwipeToDelete() ) ){
+                attachToRecyclerView( this@insideRecyclerView)
+            }
         }
     }
+
+    private fun supportSwipeToDelete() : Callback =
+        object : ItemTouchHelper.Callback(){
+            override fun getMovementFlags(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
+            ): Int = makeMovementFlags( 0, RIGHT  )
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean = false
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val crimeViewHolder = viewHolder as RecyclerAdapter.CrimeViewHolder
+                crimeViewHolder.let {
+                    val adapterPosition = it.adapterPosition
+                    val swipedCrime = this@CrimeListFragment.recyclerAdapter.getCrimeAtIndex( adapterPosition )
+                    viewModel.deleteCrime( swipedCrime )
+                }
+            }
+        }
 
     private fun implementListeners() : ClickListeners = object :
         ClickListeners {

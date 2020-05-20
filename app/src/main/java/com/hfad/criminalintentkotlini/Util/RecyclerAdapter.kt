@@ -1,8 +1,7 @@
 package com.hfad.criminalintentkotlini.Util
 
-import android.app.Dialog
 import android.graphics.Color
-import android.os.AsyncTask
+import android.os.Build
 import android.util.Log
 import android.util.SparseBooleanArray
 import android.view.LayoutInflater
@@ -10,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.fragment.app.DialogFragment
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -20,10 +19,9 @@ import com.hfad.criminalintentkotlini.UI.TAG
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.reflect.jvm.internal.impl.utils.CollectionsKt
 
 class RecyclerAdapter( var sparseBoolean: SparseBooleanArray )
-     : RecyclerView.Adapter<RecyclerAdapter.ViewHolder>()
+     : RecyclerView.Adapter<RecyclerAdapter.CrimeViewHolder>()
 {
 
     private var newCrimeIndex: Int? = null
@@ -60,14 +58,15 @@ class RecyclerAdapter( var sparseBoolean: SparseBooleanArray )
                 oldItem.id == newItem.id
 
             override fun areContentsTheSame(oldItem: Crime, newItem: Crime): Boolean =
-                oldItem equals newItem
+                oldItem == newItem
         }
     }
 
-    inner class ViewHolder( private val view: View ) : RecyclerView.ViewHolder(view) {
+    inner class CrimeViewHolder(private val view: View ) : RecyclerView.ViewHolder(view) {
         var crimetitle: TextView = view.findViewById(R.id.sup_id)
         var solvedImage: ImageView = view.findViewById(R.id.solved_img)
         var dateLabel: TextView = view.findViewById(R.id.createdDate_id)
+        var lastModified: TextView = view.findViewById(R.id.updatedDate_id)
 
         fun bind(crime : Crime, position: Int ) {
 
@@ -78,7 +77,8 @@ class RecyclerAdapter( var sparseBoolean: SparseBooleanArray )
 
             if (crime.solved!!) solvedImage.visibility = ImageView.VISIBLE
             else solvedImage.visibility = ImageView.GONE
-            dateLabel.text = crimeDate.format( Date())
+            dateLabel.text = crime.date.toString()
+            lastModified.text = crime.lastUpdated.toString()
             crimetitle.text = crime.title
         }
     }
@@ -87,14 +87,14 @@ class RecyclerAdapter( var sparseBoolean: SparseBooleanArray )
 
     override fun getItemCount() : Int = asyncListDiffer.currentList.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeViewHolder {
         Log.d(TAG, "OnCreateView")
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.single_row, parent, false))
+        return CrimeViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.single_row, parent, false))
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position : Int ) {
+    override fun onBindViewHolder(holderCrime: CrimeViewHolder, position : Int ) {
         Log.d(TAG, "OnBIndView")
-        holder.bind( asyncListDiffer.currentList[ position ], position )
+        holderCrime.bind( asyncListDiffer.currentList[ position ], position )
     }
 
     fun submitList( newList: List<Crime> ) {

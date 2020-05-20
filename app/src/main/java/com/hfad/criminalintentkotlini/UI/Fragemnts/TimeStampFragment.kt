@@ -11,6 +11,8 @@ import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.datepicker.MaterialStyledDatePickerDialog
 import java.util.*
 
 class TimeStampFragment : DialogFragment()
@@ -25,6 +27,7 @@ class TimeStampFragment : DialogFragment()
 
            return TimeStampFragment().apply {
                arguments = bundle
+
            }
         }
     }

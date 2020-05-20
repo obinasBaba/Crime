@@ -7,14 +7,13 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
@@ -27,23 +26,20 @@ class CrimeDetailFragment : Fragment()
 {
     companion object{
         private const val NO_ARG = -1
+        private var bundledCrimeId = NO_ARG
         const val DATE_REQUEST_CODE = 0
     }
 
-    //Listen for change within Current selected crime with observer and update value
-    private var selectedCrime : Crime by Delegates.observable( Crime() ) { _, _, newCrime ->
-            viewModel.crimeModified.value = !( newCrime equals viewModel.cachedCrime )
-            Toast.makeText( context, "dataChanged = ${viewModel.crimeModified.value} ", Toast.LENGTH_SHORT ).show()
-    }
+    private val datePicker : MaterialDatePicker<Long> by lazy { buildDatePicker() }
+
+    private var selectedCrime : Crime by observeSelectedCrime()
     // Initialize the viewModel by lazy
     private val viewModel: CrimeListViewModel by activityViewModels()
-    val animBounce: Animation by lazy { AnimationUtils.loadAnimation( requireContext(), R.anim.bounce) }
-    private var bundledCrimeId = NO_ARG
+
 
     override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View? {
         return inflater.inflate(R.layout.crime_fragment, container, false )
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) : Unit {
         super.onViewCreated(view, savedInstanceState)
@@ -107,15 +103,21 @@ class CrimeDetailFragment : Fragment()
         }
 
         crime_date.setOnClickListener{
-            TimeStampFragment.getInstance( selectedCrime.lastUpdated ).apply {
-                show(  this@CrimeDetailFragment.parentFragmentManager, "Date_Picker_Frag" )
-                setTargetFragment( this@CrimeDetailFragment, DATE_REQUEST_CODE )
+            datePicker.apply {
+                show(this@CrimeDetailFragment.parentFragmentManager, "Date_Picker_Frag")
+                setTargetFragment(this@CrimeDetailFragment, DATE_REQUEST_CODE)
             }
+        }
 
-//            val action = CrimeDetailFragmentDirections.actionCrimeDetailFragmentToTimeStampFragment( selectedCrime.lastUpdated )
+        datePicker.addOnPositiveButtonClickListener { selectedDate ->
+
+            selectedCrime.lastUpdated?.time = selectedDate
+            bindViews()
 
         }
     }
+
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -176,5 +178,18 @@ class CrimeDetailFragment : Fragment()
             }
         }else
             fab_id.hide()
+    }
+
+
+    private fun observeSelectedCrime() = Delegates.observable( Crime() ) { _, _, newCrime ->
+        viewModel.crimeModified.value = !( newCrime equals  viewModel.cachedCrime )
+        Toast.makeText( context, "dataChanged = ${viewModel.crimeModified.value} ", Toast.LENGTH_SHORT ).show()
+    }
+    private fun buildDatePicker() : MaterialDatePicker<Long>  {
+        val datePicker = MaterialDatePicker.Builder.datePicker()
+        
+        return datePicker.setTitleText("Select Crime Date")
+            .setSelection( selectedCrime.lastUpdated?.time ?: Date().time  )
+            .build()
     }
 }

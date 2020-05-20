@@ -65,6 +65,10 @@ class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( appli
         dataManager.deleteCrimes( willBeDeleted )
     }
 
+    fun deleteCrime( crime : Crime ){
+        dataManager.deleteCrimes( listOf( crime ) )
+    }
+
     // TODO -  RUN ON BACKGROUND
     fun updateCrime(crimeById: Crime) =
         dataManager.updateCrimeDb(crimeById ).also {
