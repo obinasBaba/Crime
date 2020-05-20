@@ -10,7 +10,23 @@
     <string name="copy">Copy</string>
     <string name="forward">Forward</string>
     <string name="Sup">sup</string>
-    <string name="LastModifed">"Last Modified - "</string>
+    <string name="description">"Once you have the date, it needs to be sent back to
+        CrimeFragment. The targetFragment property stores
+        the fragment instance that started your
+        DatePickerFragment. Since it is nullable, you wrap it in
+        a safe-call let block. You then cast the fragment instance to
+        your Callbacks interface and call the
+        Once you have the date, it needs to be sent back to
+        CrimeFragment. The targetFragment property stores
+        the fragment instance that started your
+        DatePickerFragment. Since it is nullable, you wrap it in
+        a safe-call let block. You then cast the fragment instance to
+        your Callbacks interface and call the
+        onDateSelected() function, passing in your new date."</string>
+
     <string name="noDate">" Undefended "</string>
     <string name="createdDate">"Create Date - "</string>
+    <string name="Solved">Solved - </string>
+    <string name="desc">Crime Description</string>
+    <string name="LastModifed">Last Modified</string>
 </resources>

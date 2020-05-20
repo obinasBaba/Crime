@@ -1,6 +1,6 @@
 package com.hfad.criminalintentkotlini.UI.Fragemnts
 
-import android.animation.Animator
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -19,13 +19,17 @@ import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
 import kotlinx.android.synthetic.main.crime_fragment.*
+import java.util.*
 import kotlin.properties.Delegates
 
 
-private const val NO_ARG = -1
-
 class CrimeDetailFragment : Fragment()
 {
+    companion object{
+        private const val NO_ARG = -1
+        const val DATE_REQUEST_CODE = 0
+    }
+
     //Listen for change within Current selected crime with observer and update value
     private var selectedCrime : Crime by Delegates.observable( Crime() ) { _, _, newCrime ->
             viewModel.crimeModified.value = !( newCrime equals viewModel.cachedCrime )
@@ -47,7 +51,12 @@ class CrimeDetailFragment : Fragment()
         bundledCrimeId = CrimeDetailFragmentArgs.fromBundle( requireArguments() ).selectedCrimeId
 
         // Track the state of fab icon with respect to crimeModification for update and create
-        viewModel.crimeModified.observe( viewLifecycleOwner, Observer { crimeModified -> fabStateListener( crimeModified ) } )
+        viewModel.crimeModified.observe( viewLifecycleOwner, Observer { crimeModified ->
+            fabStateListener( crimeModified )
+
+            if ( crimeModified ) selectedCrime.lastUpdated = Date()  // update Modified date
+            else selectedCrime.lastUpdated = viewModel.cachedCrime?.lastUpdated  // reverse it if not changed
+        } )
 
         // if true it's after configChange so use the savedInstanceCrime object
         if ( savedInstanceState != null && viewModel.crimeModified.value!! ) {
@@ -68,7 +77,7 @@ class CrimeDetailFragment : Fragment()
 
     private fun bindViews() {
         crime_title.setText(selectedCrime.title)
-        crime_date.text = selectedCrime.date.toString()
+        crime_date.text = selectedCrime.lastUpdated.toString()
         crime_solved.isChecked = selectedCrime.solved ?: false
     }
 
@@ -97,7 +106,24 @@ class CrimeDetailFragment : Fragment()
             onBackPressed()
         }
 
+        crime_date.setOnClickListener{
+            TimeStampFragment.getInstance( selectedCrime.lastUpdated ).apply {
+                show(  this@CrimeDetailFragment.parentFragmentManager, "Date_Picker_Frag" )
+                setTargetFragment( this@CrimeDetailFragment, DATE_REQUEST_CODE )
+            }
 
+//            val action = CrimeDetailFragmentDirections.actionCrimeDetailFragmentToTimeStampFragment( selectedCrime.lastUpdated )
+
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        data?.let { incomingIntent ->
+            val lastModifiedDate = incomingIntent.getSerializableExtra(TimeStampFragment.SERIALIZED_DATE) as Date
+            selectedCrime.lastUpdated = lastModifiedDate
+            bindViews()
+        }
     }
 
     override fun onDestroy() {
