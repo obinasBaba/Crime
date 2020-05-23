@@ -3,38 +3,28 @@ package com.hfad.criminalintentkotlini.ViewModels
 import android.app.Application
 import android.util.SparseBooleanArray
 import android.widget.Toast
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.Model.DataManager
+import com.hfad.criminalintentkotlini.UI.Fragemnts.s
 import com.hfad.criminalintentkotlini.Util.RecyclerAdapter
 
-class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( applicationCtx ) {
+class CrimeListViewModel(private val applicationCtx: Application, private val dataManager: DataManager ) : ViewModel() {
 
 
-
-
-
-    private val dataManager : DataManager = DataManager.getInstance( getApplication() )
-    var savedInstanceCrime: Crime? = null
+    private val crimeDetail: MutableLiveData<Crime> by lazy { MutableLiveData<Crime>() }
+    var sparseBoolean : SparseBooleanArray = SparseBooleanArray()
     var crimeModified : MutableLiveData< Boolean > = MutableLiveData( false ) // Determine whether to update give crime or not
+    val crimeList : LiveData< List<Crime> > = fetchCrimeListFromDB()
     var cachedCrime: Crime? = null // A crime use to compare for change
+    var savedCrime: Crime? = null
     var cachedIndex: Int = -1
 
-    var sparseBoolean : SparseBooleanArray = SparseBooleanArray()
-    private val crimeDetail: MutableLiveData<Crime> by lazy { MutableLiveData<Crime>() }
-    val crimeList : LiveData< List<Crime> > = fetchCrimeListFromDB()
-
     init {
-        Toast.makeText( getApplication(), "MODEL VIEW STARTED", Toast.LENGTH_LONG).show()
+        Toast.makeText( applicationCtx, "viewModel STARTED", Toast.LENGTH_LONG).show()
     }
 
     private fun fetchCrimeListFromDB() = dataManager.readBulk()
-
-    /**
-     * =============================================================================================================
-     */
 
     fun getDetailCrimeLiveData(): LiveData<Crime> = crimeDetail
 
@@ -43,7 +33,7 @@ class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( appli
     fun queryCrimeById( newIndex: Int ): Crime {
 
         return if ( newIndex == cachedIndex )
-            savedInstanceCrime ?: cachedCrime!!
+            savedCrime ?: cachedCrime!!
         else {
             cachedIndex = newIndex
             cachedCrime ?: dataManager.queryCrimeById( newIndex ).also {
@@ -83,12 +73,12 @@ class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( appli
 
 
     override fun onCleared() {
-        Toast.makeText( getApplication(), "MODEL VIEW DESTROYED", Toast.LENGTH_LONG).show()
+        Toast.makeText( applicationCtx, "MODEL VIEW DESTROYED", Toast.LENGTH_LONG).show()
         super.onCleared()
     }
 
     fun finishing() {
-        savedInstanceCrime = null
+        savedCrime = null
         crimeModified = MutableLiveData( false )
         cachedCrime = null
         cachedIndex = -1
@@ -97,4 +87,5 @@ class CrimeListViewModel( applicationCtx: Application) : AndroidViewModel( appli
     fun create(): Crime = cachedCrime ?: Crime( title = "" ).also { cachedCrime = it }
 
     fun update( id : Int ): Crime = cachedCrime ?: dataManager.queryCrimeById( id ).also { cachedCrime = it }
+
 }

@@ -24,22 +24,17 @@ class RecyclerAdapter( var sparseBoolean: SparseBooleanArray )
      : RecyclerView.Adapter<RecyclerAdapter.CrimeViewHolder>()
 {
 
+    private val asyncListDiffer = AsyncListDiffer< Crime >( this, DIFF_ITEM_CALLBACK )
     private var newCrimeIndex: Int? = null
 
-    private val asyncListDiffer = AsyncListDiffer< Crime >( this, DIFF_ITEM_CALLBACK )
-
     init {
-        asyncListDiffer.addListListener ( object : AsyncListDiffer.ListListener< Crime > {
-            override fun onCurrentListChanged( previousList: MutableList<Crime>,
-                                               currentList: MutableList<Crime>) {
-
-                currentList.asSequence().filterNot { currentCrime ->
-                     currentCrime in previousList
-                }.forEach {
-                    newCrimeIndex = asyncListDiffer.currentList.indexOf( it )
-                }
+        asyncListDiffer.addListListener { previousList, currentList ->
+            currentList.asSequence().filterNot { currentCrime ->
+                currentCrime in previousList
+            }.forEach {
+                newCrimeIndex = asyncListDiffer.currentList.indexOf( it )
             }
-        })
+        }
     }
 
     fun scrollToPosition( block : ( Int ) -> Unit ) {
@@ -70,7 +65,7 @@ class RecyclerAdapter( var sparseBoolean: SparseBooleanArray )
 
         fun bind(crime : Crime, position: Int ) {
 
-            view.setBackgroundColor(if (sparseBoolean.get( position )) 0x9934B5E4.toInt() else Color.TRANSPARENT)
+            view.setBackgroundColor( if (sparseBoolean.get( position )) Color.YELLOW else Color.TRANSPARENT)
 
             // TODO - Change to proper date
             val crimeDate: DateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())

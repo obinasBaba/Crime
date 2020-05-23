@@ -24,7 +24,6 @@ class TouchListenerImplementation(
 
         gestureDetector =
             GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-
                 override fun onSingleTapUp(e: MotionEvent?): Boolean {
                     Log.d(TAG, "singleTAP UP" )
 
@@ -34,7 +33,6 @@ class TouchListenerImplementation(
                             clickListeners.onClick( recyclerView.getChildAdapterPosition( childView ), childView )
                         }
                     }
-
                     return true
                 }
 
@@ -47,44 +45,23 @@ class TouchListenerImplementation(
                     }
                 }
 
-                override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-                    return super.onSingleTapConfirmed(e)
-                }
-
                 override fun onFling(
                     startAt: MotionEvent?,
                     endAt: MotionEvent?,
                     velocityX: Float,
                     velocityY: Float
-                ): Boolean
-                {
-                    if ( startAt != null && endAt != null )
-                    {
+                ): Boolean {
+                    if ( startAt != null && endAt != null ) {
                         val finalX = abs( endAt.x ) - abs( startAt.x )
                         val finalY = abs( endAt.y ) - abs( startAt.y )
 
-                        if ( finalX > finalY )
-                        {
+                        if ( finalX > finalY ) {
                             Toast.makeText( context, "Right or Left ", Toast.LENGTH_SHORT ).show()
                         }
                     }
                     return true
                 }
-
-                override fun onScroll(
-                    e1: MotionEvent?,
-                    e2: MotionEvent?,
-                    distanceX: Float,
-                    distanceY: Float
-                ): Boolean
-                {
-                    return super.onScroll(e1, e2, distanceX, distanceY)
-                }
             })
-    }
-
-    override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
-        super.onTouchEvent(rv, e)
     }
 
     override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {

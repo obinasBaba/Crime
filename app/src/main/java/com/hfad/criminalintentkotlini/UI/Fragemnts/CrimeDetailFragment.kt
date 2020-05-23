@@ -9,13 +9,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.R
+import com.hfad.criminalintentkotlini.Util.Injector
 import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
 import kotlinx.android.synthetic.main.crime_fragment.*
 import java.util.*
@@ -30,11 +33,10 @@ class CrimeDetailFragment : Fragment()
         const val DATE_REQUEST_CODE = 0
     }
 
+    private val viewModel : CrimeListViewModel by viewModels( factoryProducer =
+    { Injector.buildFactory( requireActivity().application)} )
     private val datePicker : MaterialDatePicker<Long> by lazy { buildDatePicker() }
-
     private var selectedCrime : Crime by observeSelectedCrime()
-    // Initialize the viewModel by lazy
-    private val viewModel: CrimeListViewModel by activityViewModels()
 
 
     override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View? {
@@ -44,37 +46,14 @@ class CrimeDetailFragment : Fragment()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) : Unit {
         super.onViewCreated(view, savedInstanceState)
 
+        val activity = requireActivity() as AppCompatActivity
+        activity.setSupportActionBar( toolbar2_id )
+
         bundledCrimeId = CrimeDetailFragmentArgs.fromBundle( requireArguments() ).selectedCrimeId
 
-        // Track the state of fab icon with respect to crimeModification for update and create
-        viewModel.crimeModified.observe( viewLifecycleOwner, Observer { crimeModified ->
-            fabStateListener( crimeModified )
-
-            if ( crimeModified ) selectedCrime.lastUpdated = Date()  // update Modified date
-            else selectedCrime.lastUpdated = viewModel.cachedCrime?.lastUpdated  // reverse it if not changed
-        } )
-
-        // if true it's after configChange so use the savedInstanceCrime object
-        if ( savedInstanceState != null && viewModel.crimeModified.value!! ) {
-            selectedCrime = viewModel.savedInstanceCrime!!
-            return
-        }
-
-        if( bundledCrimeId == NO_ARG ) {
-            // create
-            selectedCrime = viewModel.create().copy()
-        }
-        else {
-            // update
-            selectedCrime = viewModel.update( bundledCrimeId ).copy()
-            bindViews()
-        }
-    }
-
-    private fun bindViews() {
-        crime_title.setText(selectedCrime.title)
-        crime_date.text = selectedCrime.lastUpdated.toString()
-        crime_solved.isChecked = selectedCrime.solved ?: false
+        observeCrimeChange()
+        if (restoreStateIfPresent(savedInstanceState)) return
+        initSelectedCrime()
     }
 
     override fun onStart() {
@@ -82,9 +61,9 @@ class CrimeDetailFragment : Fragment()
 
         crime_title.addTextChangedListener( object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-               selectedCrime = selectedCrime.apply {
-                   selectedCrime.title = s.toString()
-               }
+                selectedCrime = selectedCrime.apply {
+                    selectedCrime.title = s.toString()
+                }
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -117,7 +96,38 @@ class CrimeDetailFragment : Fragment()
         }
     }
 
+    private fun bindViews() {
+        crime_title.setText(selectedCrime.title)
+        crime_date.text = selectedCrime.lastUpdated.toString()
+        crime_solved.isChecked = selectedCrime.solved ?: false
+    }
 
+    private fun initSelectedCrime() {
+        if (bundledCrimeId == NO_ARG) {
+            selectedCrime = viewModel.create().copy()
+        } else {
+            selectedCrime = viewModel.update(bundledCrimeId).copy()
+            bindViews()
+        }
+    }
+
+    private fun restoreStateIfPresent(savedInstanceState: Bundle?): Boolean {
+        if (savedInstanceState != null && viewModel.crimeModified.value!!) {
+            selectedCrime = viewModel.savedCrime!!
+            return true
+        }
+        return false
+    }
+
+    private fun observeCrimeChange() {
+        viewModel.crimeModified.observe(viewLifecycleOwner, Observer { crimeModified ->
+
+            fabStateListener(crimeModified)
+            if (crimeModified) selectedCrime.lastUpdated = Date()  // update Modified date
+            else selectedCrime.lastUpdated =
+                viewModel.cachedCrime?.lastUpdated  // reverse it if not changed
+        })
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -134,7 +144,7 @@ class CrimeDetailFragment : Fragment()
         Toast.makeText( context, "onDestroy", Toast.LENGTH_SHORT).show()
 
         if( viewModel.crimeModified.value!! && viewModel.cachedCrime != null ) {
-            viewModel.savedInstanceCrime = selectedCrime
+            viewModel.savedCrime = selectedCrime
         }
     }
 

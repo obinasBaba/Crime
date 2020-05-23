@@ -2,6 +2,7 @@ package com.hfad.criminalintentkotlini.UI
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
@@ -25,4 +26,12 @@ class MainActivity : AppCompatActivity()
 
     override fun onSupportNavigateUp(): Boolean =
         findNavController( R.id.main_host_frag ).navigateUp() || super.onSupportNavigateUp()
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+        super.onSaveInstanceState(outState, outPersistentState)
+    }
 }

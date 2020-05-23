@@ -2,9 +2,10 @@ package com.hfad.criminalintentkotlini.Util
 
 import android.graphics.Rect
 import android.view.View
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
-class ItemDecorationImp( val padding : Int ) : RecyclerView.ItemDecoration()
+class ItemDecorationImp(val padding : Int ) : RecyclerView.ItemDecoration()
 {
     override fun getItemOffsets(
         outRect: Rect,

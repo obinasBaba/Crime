@@ -20,9 +20,6 @@
         <!-- Custom background for actionMode. -->
         <item name="actionModeBackground">@color/c3</item>
 
-
-
-
     </style>
 
 

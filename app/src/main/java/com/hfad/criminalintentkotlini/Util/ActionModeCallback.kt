@@ -8,8 +8,8 @@ import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeListFragment
 import com.hfad.criminalintentkotlini.Util.RecyclerAdapter
 
-class ActionModeImplementation(private val recyclerAdapter: RecyclerAdapter,
-                               private val fragment: Fragment )
+class ActionModeCallback(private val recyclerAdapter: RecyclerAdapter,
+                         private val fragment: Fragment )
     : ActionMode.Callback
 {
     override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
