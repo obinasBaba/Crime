@@ -1,5 +1,6 @@
 package com.hfad.criminalintentkotlini.UI.Fragemnts
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -11,7 +12,6 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -19,9 +19,11 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.Util.Injector
+import com.hfad.criminalintentkotlini.Util.PseudoMessageLobby
 import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
 import kotlinx.android.synthetic.main.crime_fragment.*
 import java.util.*
+import java.util.concurrent.Executors.newSingleThreadExecutor
 import kotlin.properties.Delegates
 
 
@@ -33,11 +35,11 @@ class CrimeDetailFragment : Fragment()
         const val DATE_REQUEST_CODE = 0
     }
 
-    private val viewModel : CrimeListViewModel by viewModels( factoryProducer =
+    private val viewModel : CrimeListViewModel by viewModels( { requireActivity() }, factoryProducer =
     { Injector.buildFactory( requireActivity().application)} )
+    private val messageLobby = PseudoMessageLobby( newSingleThreadExecutor(), lifecycle )
     private val datePicker : MaterialDatePicker<Long> by lazy { buildDatePicker() }
     private var selectedCrime : Crime by observeSelectedCrime()
-
 
     override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View? {
         return inflater.inflate(R.layout.crime_fragment, container, false )
@@ -51,7 +53,7 @@ class CrimeDetailFragment : Fragment()
 
         bundledCrimeId = CrimeDetailFragmentArgs.fromBundle( requireArguments() ).selectedCrimeId
 
-        observeCrimeChange()
+        observation()
         if (restoreStateIfPresent(savedInstanceState)) return
         initSelectedCrime()
     }
@@ -89,10 +91,8 @@ class CrimeDetailFragment : Fragment()
         }
 
         datePicker.addOnPositiveButtonClickListener { selectedDate ->
-
             selectedCrime.lastUpdated?.time = selectedDate
             bindViews()
-
         }
     }
 
@@ -119,7 +119,7 @@ class CrimeDetailFragment : Fragment()
         return false
     }
 
-    private fun observeCrimeChange() {
+    private fun observation() {
         viewModel.crimeModified.observe(viewLifecycleOwner, Observer { crimeModified ->
 
             fabStateListener(crimeModified)
@@ -127,36 +127,6 @@ class CrimeDetailFragment : Fragment()
             else selectedCrime.lastUpdated =
                 viewModel.cachedCrime?.lastUpdated  // reverse it if not changed
         })
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        data?.let { incomingIntent ->
-            val lastModifiedDate = incomingIntent.getSerializableExtra(TimeStampFragment.SERIALIZED_DATE) as Date
-            selectedCrime.lastUpdated = lastModifiedDate
-            bindViews()
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        Toast.makeText( context, "onDestroy", Toast.LENGTH_SHORT).show()
-
-        if( viewModel.crimeModified.value!! && viewModel.cachedCrime != null ) {
-            viewModel.savedCrime = selectedCrime
-        }
-    }
-
-    private fun onBackPressed() {
-        if ( viewModel.crimeModified.value!! ) {
-            // TODO - ALERT DIALOG
-            Toast.makeText( context, "UNSAVE CHANGE", Toast.LENGTH_SHORT).show()
-        }
-
-        viewModel.finishing()
-        val sucess = findNavController().popBackStack()
-        Toast.makeText( context, "$sucess" , Toast.LENGTH_SHORT).show()
     }
 
     private fun fabEventListener() {
@@ -176,13 +146,13 @@ class CrimeDetailFragment : Fragment()
     private fun fabStateListener( crimeModified : Boolean ){
         if ( bundledCrimeId == NO_ARG && crimeModified ) {
             // Create
-            fab_id.apply {
+            fab_id.run {
                 setImageResource( R.drawable.ic_create_black_24dp )
                 show()
             }
 
         }else if ( bundledCrimeId != NO_ARG && crimeModified  ){
-            fab_id.apply {
+            fab_id.run {
                 setImageResource( R.drawable.ic_file_upload_black_24dp )
                 show()
             }
@@ -190,16 +160,44 @@ class CrimeDetailFragment : Fragment()
             fab_id.hide()
     }
 
-
+    @SuppressLint("NewApi")
     private fun observeSelectedCrime() = Delegates.observable( Crime() ) { _, _, newCrime ->
         viewModel.crimeModified.value = !( newCrime equals  viewModel.cachedCrime )
         Toast.makeText( context, "dataChanged = ${viewModel.crimeModified.value} ", Toast.LENGTH_SHORT ).show()
     }
+
     private fun buildDatePicker() : MaterialDatePicker<Long>  {
         val datePicker = MaterialDatePicker.Builder.datePicker()
-        
         return datePicker.setTitleText("Select Crime Date")
             .setSelection( selectedCrime.lastUpdated?.time ?: Date().time  )
             .build()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        data?.let { incomingIntent ->
+            val lastModifiedDate = incomingIntent.getSerializableExtra(TimeStampFragment.SERIALIZED_DATE) as Date
+            selectedCrime.lastUpdated = lastModifiedDate
+            bindViews()
+        }
+    }
+
+    private fun onBackPressed() {
+        if ( viewModel.crimeModified.value!! ) {
+            // TODO - ALERT DIALOG
+            Toast.makeText( context, "UNSAVE CHANGE", Toast.LENGTH_SHORT).show()
+        }
+
+        viewModel.reverse()
+        val sucess = findNavController().popBackStack()
+        Toast.makeText( context, "$sucess" , Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onDestroy() {
+        Toast.makeText( context, "onDestroy", Toast.LENGTH_SHORT).show()
+        if( viewModel.crimeModified.value!! && viewModel.cachedCrime != null ) {
+            viewModel.savedCrime = selectedCrime
+        }
+        super.onDestroy()
     }
 }

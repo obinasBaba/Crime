@@ -28,7 +28,7 @@ private const val ITEM_TOP_PADDING: Int = 5
 const val s = "key2"
 class CrimeListFragment : Fragment() {
 
-    private val viewModel : CrimeListViewModel by viewModels( factoryProducer = { Injector.buildFactory( requireActivity().application)} )
+    private val viewModel : CrimeListViewModel by viewModels( { requireActivity() }, factoryProducer = { Injector.buildFactory( requireActivity().application)} )
     private val recyclerAdapter: RecyclerAdapter by lazy { RecyclerAdapter( SparseBooleanArray() ) }
     private var actionMode: ActionMode? = null
 
@@ -38,14 +38,19 @@ class CrimeListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val activity = requireActivity() as AppCompatActivity
-        activity.setSupportActionBar( toolbar_id )
+        arguments?.let {
+            Toast.makeText( requireContext(), "${it.get(s)}", Toast.LENGTH_SHORT ).show()
+        }
 
-        activity.actionBar
-
+        setUpToolBar()
         setUpRecyclerView()
         restoreActionModeState()
-        observeCrimeList()
+        observation()
+    }
+
+    private fun setUpToolBar() {
+        val activity = requireActivity() as AppCompatActivity
+        activity.setSupportActionBar(toolbar_id)
     }
 
     override fun onStart() {
@@ -61,57 +66,13 @@ class CrimeListFragment : Fragment() {
             adapter = recyclerAdapter
             addOnItemTouchListener(
                 TouchListenerImplementation(
-                    requireContext(), this, setupItemSelectionListener(), this@CrimeListFragment
-                )
+                    requireContext(), this, setupItemSelectionListener(), this@CrimeListFragment)
             )
-
-            with(ItemTouchHelper(supportSwipeToDelete())) {
+            with(ItemTouchHelper( supportSwipeToDelete() { onSwipe( it ) } )) {
                 attachToRecyclerView(this@insideRecyclerView)
             }
         }
     }
-
-    private fun restoreActionModeState() {
-        viewModel.sparseBoolean.run {
-            if (size() > 0) {
-                recyclerAdapter.sparseBoolean = this
-                startActionMode(null )
-            }
-        }
-    }
-
-    private fun observeCrimeList() {
-        viewModel.crimeList.observe(viewLifecycleOwner, Observer {
-            recyclerAdapter.submitList(it)
-            recyclerAdapter.scrollToPosition { newCrimeIndex ->
-                // zRecyclerView.smoothScrollToPosition( newCrimeIndex )
-            }
-        })
-    }
-
-    private fun supportSwipeToDelete(): ItemTouchHelper.Callback =
-        object : ItemTouchHelper.Callback() {
-            override fun getMovementFlags(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder
-            ): Int = makeMovementFlags(0, ItemTouchHelper.RIGHT)
-
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean = false
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val crimeViewHolder = viewHolder as RecyclerAdapter.CrimeViewHolder
-                crimeViewHolder.let {
-                    val adapterPosition = it.adapterPosition
-                    val swipedCrime =
-                        this@CrimeListFragment.recyclerAdapter.getCrimeAtIndex(adapterPosition)
-                    viewModel.deleteCrime(swipedCrime)
-                }
-            }
-        }
 
     private fun setupItemSelectionListener(): ClickListeners = object : ClickListeners {
         override fun onClick( pos: Int, view: View ) {
@@ -132,13 +93,50 @@ class CrimeListFragment : Fragment() {
         findNavController().navigate(actionToCrimeDetailFragment)
     }
 
+    private fun onSwipe(viewHolder: RecyclerView.ViewHolder ){
+        val crimeViewHolder = viewHolder as RecyclerAdapter.CrimeViewHolder
+        crimeViewHolder.let {
+            val adapterPosition = it.adapterPosition
+            val swipedCrime =
+                this@CrimeListFragment.recyclerAdapter.getCrimeAtIndex(adapterPosition)
+            viewModel.deleteCrime(swipedCrime)
+        }
+    }
+
+    private fun restoreActionModeState() {
+        viewModel.sparseBoolean.run {
+            if (size() > 0) {
+                recyclerAdapter.sparseBoolean = this
+                startActionMode(null )
+            }
+        }
+    }
+
+    private fun observation() {
+        viewModel.crimeList.observe(viewLifecycleOwner, Observer {
+            recyclerAdapter.submitList(it)
+            recyclerAdapter.scrollToPosition { newCrimeIndex ->
+                // zRecyclerView.smoothScrollToPosition( newCrimeIndex )
+            }
+        })
+
+        viewModel.deleteSelectionPressed.observe( viewLifecycleOwner, Observer {
+            deleteSelectedItems()
+        })
+
+        viewModel.deselectPressed.observe( viewLifecycleOwner, Observer {
+            recyclerAdapter.deselect()
+            nullifyActionMode()
+        })
+    }
+
     private fun startActionMode(pos: Int?) {
         pos?.let { recyclerAdapter.toggleSelection(pos) }
         val hasSelectedItems: Boolean = recyclerAdapter.sparseBoolean.size() > 0
 
         if (actionMode == null && hasSelectedItems) {
             actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(
-                ActionModeCallback(recyclerAdapter, this )
+                ActionModeCallback()
             )
         } else if (actionMode != null && !hasSelectedItems) {
             //Last item deselected, stop actionMode
@@ -148,12 +146,12 @@ class CrimeListFragment : Fragment() {
             ?: Toast.makeText(requireContext(), "Null", Toast.LENGTH_SHORT).show()
     }
 
-    fun deleteSelectedItems() {
+    private fun deleteSelectedItems() {
         viewModel.deleteCrimes(recyclerAdapter)
         actionMode?.finish()
     }
 
-    fun nullifyActionMode() {
+    private fun nullifyActionMode() {
         if (actionMode != null) actionMode = null
     }
 
@@ -161,9 +159,14 @@ class CrimeListFragment : Fragment() {
         Toast.makeText(context, "OnActivityResult", Toast.LENGTH_SHORT).show()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        arguments?.putString( s, "saved state" )
+    }
+
     override fun onDestroy() {
-        super.onDestroy()
         viewModel.sparseBoolean = recyclerAdapter.sparseBoolean
+        super.onDestroy()
     }
 }
 

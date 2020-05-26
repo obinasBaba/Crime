@@ -3,20 +3,23 @@ package com.hfad.criminalintentkotlini.Util
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
-import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import com.hfad.criminalintentkotlini.R
-import com.hfad.criminalintentkotlini.UI.Fragemnts.CrimeListFragment
-import com.hfad.criminalintentkotlini.Util.RecyclerAdapter
 
-class ActionModeCallback(private val recyclerAdapter: RecyclerAdapter,
-                         private val fragment: Fragment )
+class ActionModeCallback()
     : ActionMode.Callback
 {
+
+    companion object{
+        val deleteCounter : MutableLiveData< Int > = MutableLiveData( 0 )
+        val stopActionModeCounter : MutableLiveData< Int > = MutableLiveData( 0 )
+    }
+
     override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
 
         when( item?.itemId ){
             R.id.action_delete -> {
-                (fragment as CrimeListFragment).deleteSelectedItems()
+                deleteCounter.value = deleteCounter.value!!.plus( 1 )
             }
             R.id.action_copy -> { }
             R.id.action_forward -> { }
@@ -34,7 +37,6 @@ class ActionModeCallback(private val recyclerAdapter: RecyclerAdapter,
     }
 
     override fun onDestroyActionMode(mode: ActionMode?) {
-        recyclerAdapter.removeSelection()
-        (fragment as CrimeListFragment).nullifyActionMode()
+        stopActionModeCounter.value = stopActionModeCounter.value!!.plus( 1 )
     }
 }

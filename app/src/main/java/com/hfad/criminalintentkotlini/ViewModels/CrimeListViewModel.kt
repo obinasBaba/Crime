@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.lifecycle.*
 import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.Model.DataManager
-import com.hfad.criminalintentkotlini.UI.Fragemnts.s
+import com.hfad.criminalintentkotlini.Util.ActionModeCallback
 import com.hfad.criminalintentkotlini.Util.RecyclerAdapter
 
 class CrimeListViewModel(private val applicationCtx: Application, private val dataManager: DataManager ) : ViewModel() {
@@ -19,6 +19,9 @@ class CrimeListViewModel(private val applicationCtx: Application, private val da
     var cachedCrime: Crime? = null // A crime use to compare for change
     var savedCrime: Crime? = null
     var cachedIndex: Int = -1
+
+    val deleteSelectionPressed = Transformations.distinctUntilChanged( ActionModeCallback.deleteCounter )
+    val deselectPressed = Transformations.distinctUntilChanged( ActionModeCallback.stopActionModeCounter )
 
     init {
         Toast.makeText( applicationCtx, "viewModel STARTED", Toast.LENGTH_LONG).show()
@@ -77,7 +80,7 @@ class CrimeListViewModel(private val applicationCtx: Application, private val da
         super.onCleared()
     }
 
-    fun finishing() {
+    fun reverse() {
         savedCrime = null
         crimeModified = MutableLiveData( false )
         cachedCrime = null

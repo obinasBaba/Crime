@@ -83,12 +83,12 @@ class RecyclerAdapter( var sparseBoolean: SparseBooleanArray )
     override fun getItemCount() : Int = asyncListDiffer.currentList.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeViewHolder {
-        Log.d(TAG, "OnCreateView")
+      //Log.d(TAG, "OnCreateView")
         return CrimeViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.single_row, parent, false))
     }
 
     override fun onBindViewHolder(holderCrime: CrimeViewHolder, position : Int ) {
-        Log.d(TAG, "OnBIndView")
+      //Log.d(TAG, "OnBIndView")
         holderCrime.bind( asyncListDiffer.currentList[ position ], position )
     }
 
@@ -117,7 +117,7 @@ class RecyclerAdapter( var sparseBoolean: SparseBooleanArray )
         notifyItemChanged(pos)
     }
 
-    fun removeSelection() {
+    fun deselect() {
         sparseBoolean = SparseBooleanArray()
         notifyDataSetChanged()
     }
