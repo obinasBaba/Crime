@@ -11,8 +11,9 @@
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
+            android:id="@+id/collpsing_layout_id"
             android:layout_height="match_parent"
-            app:toolbarId="@+id/toolbar"
+            app:toolbarId="@+id/toolbar2_id"
             app:layout_scrollFlags="scroll|snapMargins|exitUntilCollapsed"
             app:layout_scrollInterpolator="@android:anim/decelerate_interpolator"
             app:contentScrim="?attr/colorPrimary">
@@ -97,7 +98,7 @@
                 tools:layout_conversion_absoluteWidth="379dp" />
 
 
-            <LinearLayout
+            <RelativeLayout
                 android:id="@+id/linearLayout2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -106,6 +107,7 @@
                 tools:layout_editor_absoluteX="0dp">
 
                 <TextView
+                    android:id="@id/textView_4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="3dp"
@@ -114,24 +116,61 @@
                     android:padding="10dp"
                     android:text="@string/LastModifed" />
 
-                <Button
-                    android:id="@+id/crime_date"
-                    style="@android:style/Widget.Holo.Button.Toggle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginRight="16dp"
-                    android:text="Modify Last Update"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView"
-                    tools:layout_conversion_absoluteHeight="48dp"
-                    tools:layout_conversion_absoluteWidth="379dp" />
+
+                   <Button
+                       android:id="@+id/crime_date"
+                       style="@android:style/Widget.Holo.Button.Toggle"
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content"
+                       android:layout_marginStart="16dp"
+                       android:layout_marginLeft="16dp"
+                       android:layout_marginEnd="16dp"
+                       android:layout_marginRight="16dp"
+                       android:text="Modify Last Update"
+                       android:layout_below="@+id/textView_4"
+                       />
+
+               <LinearLayout
+                   android:layout_width="match_parent"
+                   android:layout_marginTop="15dp"
+                   android:orientation="horizontal"
+                   android:layout_below="@+id/crime_date"
+                   android:layout_height="wrap_content">
+
+                   <Button
+                       android:id="@+id/send_crime_id"
+                       style="@android:style/Widget.Holo.Button.Toggle"
+                       android:layout_width="match_parent"
+                       android:layout_weight=".5"
+                       android:layout_height="wrap_content"
+                       android:layout_marginStart="16dp"
+                       android:layout_marginLeft="16dp"
+                       android:layout_marginEnd="16dp"
+                       android:layout_marginRight="16dp"
+                       android:text="Send Crime"
+                       android:layout_below="@+id/crime_date"
+                       android:layout_gravity="center_horizontal"
+                       />
+
+                   <Button
+                       android:id="@+id/chooseSuspect_id"
+                       style="@android:style/Widget.Holo.Button.Toggle"
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content"
+                       android:layout_marginStart="16dp"
+                       android:layout_marginLeft="16dp"
+                       android:layout_weight=".5"
+                       android:layout_marginEnd="16dp"
+                       android:layout_marginRight="16dp"
+                       android:text="Choose Suspect"
+                       android:layout_toRightOf="@+id/send_crime_id"
+                       android:layout_gravity="center_horizontal"
+                       />
+
+               </LinearLayout>
 
 
-            </LinearLayout>
+            </RelativeLayout>
 
 
             <LinearLayout
@@ -245,8 +284,9 @@
         android:id="@+id/fab_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_marginEnd="8dp"
+
+        android:layout_marginEnd="18dp"
+        android:layout_gravity="bottom|end"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"

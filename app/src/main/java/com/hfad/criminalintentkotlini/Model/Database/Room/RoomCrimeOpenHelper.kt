@@ -11,7 +11,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import kotlin.collections.ArrayList
 
-@Database( entities = [Crime::class], version = 3, exportSchema = true )
+@Database( entities = [Crime::class], version = 4, exportSchema = true )
 @TypeConverters( DateConverter::class )
 abstract class RoomCrimeOpenHelper() : RoomDatabase()
 {
@@ -31,11 +31,18 @@ abstract class RoomCrimeOpenHelper() : RoomDatabase()
             }
         }
 
+        val migration_3_4 = object : Migration( 3, 4 )
+        {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL( "ALTER TABLE crime_table ADD COLUMN suspect TEXT" )
+            }
+        }
+
         private var roomCrimeOpenHelper : RoomCrimeOpenHelper? = null
         fun getInstance( ctx : Context) : RoomCrimeOpenHelper =
             roomCrimeOpenHelper ?: synchronized( this ){
                 Room.databaseBuilder( ctx.applicationContext, RoomCrimeOpenHelper::class.java, "crimeDb" )
-                    .addMigrations( migration_1_2, migration_2_3   )
+                    .addMigrations( migration_1_2, migration_2_3, migration_3_4   )
                     .build().also {
                         roomCrimeOpenHelper = it
 
@@ -59,4 +66,15 @@ object IO_Executor{
         }
         return list
     }
+}
+
+class DateConverter
+{
+    @TypeConverter
+    fun fromTimeStamp( timeStamp : Long? ) : Date? =
+        timeStamp?.let { Date(it) }
+
+    @TypeConverter
+    fun toTimeStamp( date : Date? ) : Long? =
+        date?.time
 }

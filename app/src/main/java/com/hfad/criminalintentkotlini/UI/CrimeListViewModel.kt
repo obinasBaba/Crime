@@ -1,4 +1,4 @@
-package com.hfad.criminalintentkotlini.ViewModels
+package com.hfad.criminalintentkotlini.UI
 
 import android.app.Application
 import android.util.SparseBooleanArray

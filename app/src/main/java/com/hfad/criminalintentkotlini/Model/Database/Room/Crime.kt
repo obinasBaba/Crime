@@ -9,14 +9,15 @@ import java.util.*
 data class Crime (@PrimaryKey( autoGenerate = true ) val id : Int? = null,
                              @ColumnInfo(name = "title")var title : String = "No Title",
                              var solved : Boolean? = false,
+                  var suspect : String? = "Choose suspect",
                              var date : Date? = null,
                              var lastUpdated : Date? = null,
                              var description : String? = null )
 {
    @RequiresApi(Build.VERSION_CODES.KITKAT)
    override infix fun equals(other: Any?): Boolean {
-       val otherCrime =  other as? Crime
-           ?: return false
+       val otherCrime =  other as? Crime ?: return false
+
        return this.title == otherCrime.title &&
                this.lastUpdated?.time == other.lastUpdated?.time &&
                this.solved == otherCrime.solved &&

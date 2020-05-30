@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.Util.*
-import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
+import com.hfad.criminalintentkotlini.UI.CrimeListViewModel
 import kotlinx.android.synthetic.main.crime_list_fragment.*
 
 

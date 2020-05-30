@@ -29,4 +29,5 @@
     <string name="Solved">Solved - </string>
     <string name="desc">Crime Description</string>
     <string name="LastModifed">Last Modified</string>
+    <string name="suspect">Suspect - </string>
 </resources>

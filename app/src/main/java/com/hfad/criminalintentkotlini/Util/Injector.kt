@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.hfad.criminalintentkotlini.Model.DataManager
-import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
+import com.hfad.criminalintentkotlini.UI.CrimeListViewModel
 
 object Injector {
 
@@ -13,7 +13,10 @@ object Injector {
             if (modelClass.isAssignableFrom(CrimeListViewModel::class.java)) {
                 val l = DataManager.getInstance( application )
                 @Suppress("UNCHECKED_cAST")
-                return CrimeListViewModel( application, l) as T
+                return CrimeListViewModel(
+                    application,
+                    l
+                ) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class *** THIS IS MINEDSKJSDF ***")
         }

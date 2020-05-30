@@ -1,8 +1,8 @@
 package com.hfad.criminalintentkotlini.UI.Fragemnts
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -15,17 +15,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.NavigationUI
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.Util.Injector
 import com.hfad.criminalintentkotlini.Util.PseudoMessageLobby
-import com.hfad.criminalintentkotlini.ViewModels.CrimeListViewModel
+import com.hfad.criminalintentkotlini.UI.CrimeListViewModel
 import kotlinx.android.synthetic.main.crime_fragment.*
 import java.util.*
 import java.util.concurrent.Executors.newSingleThreadExecutor
 import kotlin.properties.Delegates
-
 
 class CrimeDetailFragment : Fragment()
 {
@@ -33,13 +33,19 @@ class CrimeDetailFragment : Fragment()
         private const val NO_ARG = -1
         private var bundledCrimeId = NO_ARG
         const val DATE_REQUEST_CODE = 0
+        const val CONTACT_REQUEST_CODE = 1
     }
 
     private val viewModel : CrimeListViewModel by viewModels( { requireActivity() }, factoryProducer =
     { Injector.buildFactory( requireActivity().application)} )
+
     private val messageLobby = PseudoMessageLobby( newSingleThreadExecutor(), lifecycle )
     private val datePicker : MaterialDatePicker<Long> by lazy { buildDatePicker() }
-    private var selectedCrime : Crime by observeSelectedCrime()
+    private var selectedCrime : Crime by Delegates.observable( Crime() ) { _, _, modifiedCrime ->
+        viewModel.crimeModified.value = (modifiedCrime != viewModel.cachedCrime)
+        Toast.makeText( context, "dataChanged = ${viewModel.crimeModified.value} ", Toast.LENGTH_SHORT ).show()
+        
+    }
 
     override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View? {
         return inflater.inflate(R.layout.crime_fragment, container, false )
@@ -50,6 +56,7 @@ class CrimeDetailFragment : Fragment()
 
         val activity = requireActivity() as AppCompatActivity
         activity.setSupportActionBar( toolbar2_id )
+        NavigationUI.setupWithNavController( collpsing_layout_id, toolbar2_id, findNavController() )
 
         bundledCrimeId = CrimeDetailFragmentArgs.fromBundle( requireArguments() ).selectedCrimeId
 
@@ -72,7 +79,34 @@ class CrimeDetailFragment : Fragment()
         } )
 
         crime_solved.setOnCheckedChangeListener(){ _, checked ->
-            selectedCrime = selectedCrime.apply { solved = checked }
+            selectedCrime = selectedCrime.apply{ solved = checked }
+        }
+
+        datePicker.addOnPositiveButtonClickListener { selectedDate ->
+            selectedCrime.lastUpdated?.time = selectedDate
+            bindViews()
+        }
+        crime_date.setOnClickListener{
+            datePicker.apply {
+                show(this@CrimeDetailFragment.parentFragmentManager, "Date_Picker_Frag")
+                setTargetFragment(this@CrimeDetailFragment, DATE_REQUEST_CODE)
+            }
+        }
+        send_crime_id.setOnClickListener{
+            val intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "text/plain"
+                putExtra( Intent.EXTRA_TEXT, selectedCrime.toString() )
+            }
+            val appChooser = Intent.createChooser( intent, "Choose MSG App to send - " )
+            startActivity( appChooser )
+        }
+        chooseSuspect_id.setOnClickListener{
+            val intent = Intent().apply {
+                action = Intent.ACTION_PICK
+                data = ContactsContract.Contacts.CONTENT_URI
+            }
+            startActivity( intent )
         }
 
         fab_id.setOnClickListener{
@@ -82,18 +116,11 @@ class CrimeDetailFragment : Fragment()
         requireActivity().onBackPressedDispatcher.addCallback( viewLifecycleOwner  ){
             onBackPressed()
         }
+    }
 
-        crime_date.setOnClickListener{
-            datePicker.apply {
-                show(this@CrimeDetailFragment.parentFragmentManager, "Date_Picker_Frag")
-                setTargetFragment(this@CrimeDetailFragment, DATE_REQUEST_CODE)
-            }
-        }
-
-        datePicker.addOnPositiveButtonClickListener { selectedDate ->
-            selectedCrime.lastUpdated?.time = selectedDate
-            bindViews()
-        }
+    private fun observeSelectedCrime() = Delegates.observable( Crime() ) { _, _, modifiedCrime ->
+        viewModel.crimeModified.value = !(modifiedCrime == viewModel.cachedCrime)
+        Toast.makeText( context, "dataChanged = ${viewModel.crimeModified.value} ", Toast.LENGTH_SHORT ).show()
     }
 
     private fun bindViews() {
@@ -121,11 +148,12 @@ class CrimeDetailFragment : Fragment()
 
     private fun observation() {
         viewModel.crimeModified.observe(viewLifecycleOwner, Observer { crimeModified ->
-
             fabStateListener(crimeModified)
-            if (crimeModified) selectedCrime.lastUpdated = Date()  // update Modified date
-            else selectedCrime.lastUpdated =
-                viewModel.cachedCrime?.lastUpdated  // reverse it if not changed
+
+            if (crimeModified)
+                selectedCrime.lastUpdated = Date()  // update Modified date
+            else
+                selectedCrime.lastUpdated = viewModel.cachedCrime?.lastUpdated  // reverse it if not changed
         })
     }
 
@@ -160,12 +188,6 @@ class CrimeDetailFragment : Fragment()
             fab_id.hide()
     }
 
-    @SuppressLint("NewApi")
-    private fun observeSelectedCrime() = Delegates.observable( Crime() ) { _, _, newCrime ->
-        viewModel.crimeModified.value = !( newCrime equals  viewModel.cachedCrime )
-        Toast.makeText( context, "dataChanged = ${viewModel.crimeModified.value} ", Toast.LENGTH_SHORT ).show()
-    }
-
     private fun buildDatePicker() : MaterialDatePicker<Long>  {
         val datePicker = MaterialDatePicker.Builder.datePicker()
         return datePicker.setTitleText("Select Crime Date")
@@ -175,10 +197,16 @@ class CrimeDetailFragment : Fragment()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        data?.let { incomingIntent ->
-            val lastModifiedDate = incomingIntent.getSerializableExtra(TimeStampFragment.SERIALIZED_DATE) as Date
-            selectedCrime.lastUpdated = lastModifiedDate
-            bindViews()
+        if ( requestCode == DATE_REQUEST_CODE ){
+            data?.let { incomingIntent ->
+                val lastModifiedDate = incomingIntent.getSerializableExtra(TimeStampFragment.SERIALIZED_DATE) as Date
+                selectedCrime.lastUpdated = lastModifiedDate
+                bindViews()
+            }
+        }else if ( requestCode == CONTACT_REQUEST_CODE ){
+            data?.let { incommingContactData ->
+                val contactUrl = incommingContactData.data
+            }
         }
     }
 
