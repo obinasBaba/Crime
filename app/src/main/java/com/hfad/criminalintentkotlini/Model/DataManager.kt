@@ -6,20 +6,23 @@ import android.os.AsyncTask
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import com.hfad.criminalintentkotlini.Model.Database.Room.Crime
-import com.hfad.criminalintentkotlini.Model.Database.Room.RoomCrimeOpenHelper
+import com.hfad.criminalintentkotlini.Model.Database.Room.CrimeDB
+import java.io.File
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 
 @SuppressLint("StaticFieldLeak")
-class DataManager private constructor ( val ctx : Application )
+class DataManager private constructor ( val ctx : Application  )
 {
     // TODO - Synchronizing
     companion object{
         private var instance : DataManager? = null
-        fun getInstance( ctx : Application ) : DataManager =
-            instance ?: DataManager( ctx ).also { instance = it }
+        fun getInstance( ctx : Application  ) : DataManager =
+            instance ?: DataManager( ctx  ).also { instance = it }
     }
 
-    private val roomDatabase : RoomCrimeOpenHelper  = RoomCrimeOpenHelper.getInstance( ctx )
-    private val crimeDao  = roomDatabase.getCrimeDao()
+    private val database : CrimeDB  = CrimeDB.getInstance( ctx )
+    private val crimeDao  = database.getCrimeDao()
 
     fun readBulk( ): LiveData<List<Crime>> {
         return object : AsyncTask< Void, Void, LiveData<List<Crime>> >(){
@@ -45,13 +48,13 @@ class DataManager private constructor ( val ctx : Application )
         }.execute( crimeById ).get()
     }
 
-    fun addNewCrime( newCrime : Crime ) {
+    fun addNewCrime( newCrime : Crime )  {
         object : AsyncTask< Crime , Void,  Void >(){
             override fun doInBackground(vararg params: Crime?) : Void? {
                  crimeDao.insertBulkOrSingle( params.first()!! )
                 return null
             }
-        }.execute( newCrime ).get()
+        }.execute( newCrime )
     }
 
     fun deleteCrimes( list : List < Crime > ) {
@@ -68,6 +71,10 @@ class DataManager private constructor ( val ctx : Application )
     }
 
     fun closeDB(){
-        roomDatabase.openHelper.close()
+        database.openHelper.close()
+    }
+
+    fun getFile(selectedCrime: Crime): File {
+       return File( ctx.filesDir, selectedCrime.uniquePhotoName() )
     }
 }

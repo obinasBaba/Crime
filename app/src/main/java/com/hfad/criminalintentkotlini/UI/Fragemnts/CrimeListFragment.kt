@@ -81,7 +81,6 @@ class CrimeListFragment : Fragment() {
                 startActionMode( pos )
             } ?: onCrimeSelected( crimeId )
         }
-
         override fun onLongClick(pos: Int, view: View) {
             startActionMode(pos)
         }

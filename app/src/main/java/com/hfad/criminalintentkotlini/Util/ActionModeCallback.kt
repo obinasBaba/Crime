@@ -6,9 +6,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.lifecycle.MutableLiveData
 import com.hfad.criminalintentkotlini.R
 
-class ActionModeCallback()
-    : ActionMode.Callback
-{
+class ActionModeCallback: ActionMode.Callback {
 
     companion object{
         val deleteCounter : MutableLiveData< Int > = MutableLiveData( 0 )
