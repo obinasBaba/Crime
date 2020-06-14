@@ -8,6 +8,8 @@ import org.junit.Test
 import org.junit.Assert.*
 import org.junit.runner.manipulation.Ordering
 import java.lang.RuntimeException
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 import javax.xml.parsers.DocumentBuilder
 import kotlin.math.sign
 
@@ -20,19 +22,14 @@ class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
 
-        println("fun")
-        val singleton = Singleton::class.java.newInstance()
-        val singleton2 = Singleton::class.java.newInstance()
-        println(singleton.toString())
-        println(singleton2.toString())
+        val exe = Executors.newSingleThreadExecutor()
+        val submit = exe.submit(Callable {
+            Thread.sleep(10000)
+            0
+        })
 
-        val s = Singleton.getInstance()
-        val s2 = Singleton.getInstance()
-        println()
-        println(s.toString())
-        println(s2.toString())
-
-
+        val a = submit.get()
+        println(a)
     }
 }
 
