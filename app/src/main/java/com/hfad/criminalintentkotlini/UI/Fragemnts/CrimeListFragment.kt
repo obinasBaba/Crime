@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hfad.criminalintentkotlini.R
 import com.hfad.criminalintentkotlini.Util.*
 import com.hfad.criminalintentkotlini.UI.CrimeListViewModel
+import com.hfad.criminalintentkotlini.UI.FileSelection
 import kotlinx.android.synthetic.main.crime_list_fragment.*
 
 
@@ -154,9 +155,6 @@ class CrimeListFragment : Fragment() {
         if (actionMode != null) actionMode = null
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Toast.makeText(context, "OnActivityResult", Toast.LENGTH_SHORT).show()
-    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

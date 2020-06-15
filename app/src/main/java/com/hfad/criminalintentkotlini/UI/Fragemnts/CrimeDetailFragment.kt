@@ -88,7 +88,6 @@ class CrimeDetailFragment : Fragment()
         }
 
         datePicker.addOnPositiveButtonClickListener { selectedDate ->
-//            selectedCrime.lastUpdated?.time = selectedDate
             selectedCrime = selectedCrime.copy( lastUpdated = Date( selectedDate ) )
             bindViews()
         }
