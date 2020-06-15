@@ -11,6 +11,7 @@ import com.hfad.criminalintentkotlini.Model.DataManager
 import com.hfad.criminalintentkotlini.Util.ActionModeCallback
 import com.hfad.criminalintentkotlini.Util.RecyclerAdapter
 import java.io.File
+import java.lang.NullPointerException
 import kotlin.math.roundToInt
 
 class CrimeListViewModel(private val applicationCtx: Application, private val dataManager: DataManager ) : ViewModel() {
@@ -94,34 +95,44 @@ class CrimeListViewModel(private val applicationCtx: Application, private val da
         return dataManager.getFile( selectedCrime )
     }
 
-    fun getScaledBitmap(path: String, destWidth: Int, destHeight: Int): Bitmap {
+    fun getScaledBitmap(path: String, destWidth: Int, destHeight: Int): Bitmap? {
         // Read in the dimensions of the image on disk
         var options = BitmapFactory.Options()
         options.inJustDecodeBounds = true
-        BitmapFactory.decodeFile(path, options)
 
-        val srcWidth = options.outWidth.toFloat()
-        val srcHeight = options.outHeight.toFloat()
+        try {
+            BitmapFactory.decodeFile(path, options)
 
-        // Figure out how much to scale down by
-        var inSampleSize = 1
-        if (srcHeight > destHeight || srcWidth > destWidth) {
-            val heightScale = srcHeight / destHeight
-            val widthScale = srcWidth / destWidth
+            val srcWidth = options.outWidth.toFloat()
+            val srcHeight = options.outHeight.toFloat()
 
-            val sampleScale = if (heightScale > widthScale) {
-                heightScale
-            } else {
-                widthScale
+            // Figure out how much to scale down by
+            var inSampleSize = 1
+            if (srcHeight > destHeight || srcWidth > destWidth) {
+                val heightScale = srcHeight / destHeight
+                val widthScale = srcWidth / destWidth
+
+                val sampleScale = if (heightScale > widthScale) {
+                    heightScale
+                } else {
+                    widthScale
+                }
+                inSampleSize = sampleScale.roundToInt()
             }
-            inSampleSize = sampleScale.roundToInt()
+
+            options = BitmapFactory.Options()
+            options.inSampleSize = inSampleSize
+
+            return BitmapFactory.decodeFile(path, options)
+
+        }catch ( nil : IllegalStateException ){
+            Toast.makeText( applicationCtx, "NiL", Toast.LENGTH_SHORT ).show()
+        }catch ( other : Exception ){
+            Toast.makeText( applicationCtx, "$other", Toast.LENGTH_SHORT ).show()
+
         }
-
-        options = BitmapFactory.Options()
-        options.inSampleSize = inSampleSize
-
         // Read in and create final bitmap
-        return BitmapFactory.decodeFile(path, options)
+        return null
     }
 
 }
