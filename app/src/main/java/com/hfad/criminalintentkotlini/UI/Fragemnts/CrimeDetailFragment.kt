@@ -10,13 +10,12 @@ import android.provider.ContactsContract
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
@@ -61,6 +60,7 @@ class CrimeDetailFragment : Fragment()
         val activity = requireActivity() as AppCompatActivity
         activity.setSupportActionBar( toolbar2_id )
         NavigationUI.setupWithNavController( collpsing_layout_id, toolbar2_id, findNavController() )
+        setHasOptionsMenu( true )
 
         bundledCrimeId = CrimeDetailFragmentArgs.fromBundle( requireArguments() ).selectedCrimeId
         observation()
@@ -262,6 +262,7 @@ class CrimeDetailFragment : Fragment()
             val bitmap = getScaledBitmap ()
             crime_image.setImageBitmap( bitmap )
             requireActivity().revokeUriPermission( providerUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION )
+            requireActivity().invalidateOptionsMenu()
         }
     }
 
@@ -280,6 +281,28 @@ class CrimeDetailFragment : Fragment()
         viewModel.reverse()
         val sucess = findNavController().popBackStack()
         Toast.makeText( context, "$sucess" , Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+       if ( item.itemId == R.id.share_photo )
+       {
+           //TODO share the photo
+           return true
+       }
+        return false
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate( R.menu.detail_frag_menu, menu )
+
+        if ( crime_image == null )
+            menu.forEach { item ->
+                item.isVisible = false
+            }
+        else
+            menu.forEach { item ->
+                item.isVisible = true
+            }
     }
 
     override fun onDestroy() {
