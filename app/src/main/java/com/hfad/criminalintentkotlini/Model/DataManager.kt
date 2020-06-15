@@ -70,11 +70,11 @@ class DataManager private constructor ( val ctx : Application  )
         }.execute( list ).get()
     }
 
-    fun closeDB(){
-        database.openHelper.close()
-    }
-
     fun getFile(selectedCrime: Crime): File {
-       return File( ctx.filesDir, selectedCrime.uniquePhotoName() )
+
+       val file = File( ctx.filesDir, selectedCrime.uniquePhotoName() )
+        if (file.exists())
+            file.delete()
+        return file
     }
 }

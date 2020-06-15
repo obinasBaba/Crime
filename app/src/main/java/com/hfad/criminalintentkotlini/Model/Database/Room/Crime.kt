@@ -21,8 +21,10 @@ data class Crime (
                   var suspect: String? = "Choose suspect",
                   var date: Date? = null,
                   var lastUpdated: Date? = null,
-                  var description: String? = null
-) {
+                  var description: String? = null,
+                  var photoName : String? = null
+                  ) {
+
     constructor() : this( id = 0 )
 
     companion object{
@@ -53,6 +55,7 @@ data class Crime (
        return this.title == otherCrime.title &&
                this.lastUpdated?.time == other.lastUpdated?.time &&
                this.solved == otherCrime.solved &&
+               this.photoName == other.photoName &&
                this.id == otherCrime.id &&
                this.suspect == other.suspect &&
                this.date == otherCrime.date

@@ -10,7 +10,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import kotlin.collections.ArrayList
 
-@Database( entities = [Crime::class], version = 6, exportSchema = true )
+@Database( entities = [Crime::class], version = 7, exportSchema = true )
 @TypeConverters( DateConverter::class )
 abstract class CrimeDB() : RoomDatabase()
 {
@@ -40,21 +40,17 @@ abstract class CrimeDB() : RoomDatabase()
                // database.execSQL("CREATE TABLE TEMP( ${BaseColumns._ID} INTEGER AUTO INCREMENT PRIMARY KEY,   )")
             }
         }
+        private val migration_6_7 = object : Migration(6,7){
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE crime_table ADD COLUMN photoName TEXT ")
+            }
+        }
 
         private var crimeDB : CrimeDB? = null
         fun getInstance( ctx : Context) : CrimeDB =
             crimeDB ?: synchronized( this ){
                 Room.databaseBuilder( ctx.applicationContext, CrimeDB::class.java, "crimeDb" )
-                    .addCallback( object : Callback(){
-                        override fun onOpen(db: SupportSQLiteDatabase) {
-                            IO_Executor.execute {
-                                db.beginTransaction()
-                                val list = IO_Executor.foo()
-                                getInstance(ctx).getCrimeDao().insertBulkOrSingle( *list.toTypedArray() )
-                                db.endTransaction()
-                            }
-                        }
-                    } )
+                    .addMigrations( migration_6_7 )
                     .build().also {
                         crimeDB = it
                     }

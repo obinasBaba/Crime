@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -29,6 +28,7 @@ import com.hfad.criminalintentkotlini.UI.CrimeListViewModel
 import com.hfad.criminalintentkotlini.Util.Injector
 import kotlinx.android.synthetic.main.crime_fragment.*
 import java.io.File
+import java.io.FileOutputStream
 import java.util.*
 import kotlin.properties.Delegates
 
@@ -88,7 +88,8 @@ class CrimeDetailFragment : Fragment()
         }
 
         datePicker.addOnPositiveButtonClickListener { selectedDate ->
-            selectedCrime.lastUpdated?.time = selectedDate
+//            selectedCrime.lastUpdated?.time = selectedDate
+            selectedCrime = selectedCrime.copy( lastUpdated = Date( selectedDate ) )
             bindViews()
         }
         crime_date.setOnClickListener{
@@ -153,13 +154,18 @@ class CrimeDetailFragment : Fragment()
         if ( isEmpty( selectedCrime.suspect ) )
             chooseSuspect_id.text = selectedCrime.suspect
 
-        if ( isEmpty( selectedCrime.lastUpdated.toString() ) )
+        if ( selectedCrime.lastUpdated != null )
             crime_date.text = selectedCrime.lastUpdated.toString()
 
         crime_solved.isChecked = selectedCrime.solved ?: false
 
         selectedCrime.suspect?.let {
             call.visibility = View.VISIBLE
+        }
+
+        selectedCrime.photoName?.let {
+            val bitmap = BitmapFactory.decodeFile( it )
+            crime_image.setImageBitmap( bitmap )
         }
     }
 
@@ -232,13 +238,7 @@ class CrimeDetailFragment : Fragment()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if ( requestCode == DATE_REQUEST_CODE ){
-            data?.let { incomingIntent ->
-                val lastModifiedDate = incomingIntent.getSerializableExtra(TimeStampFragment.SERIALIZED_DATE) as Date
-                selectedCrime.lastUpdated = lastModifiedDate
-                bindViews()
-            }
-        }
+
         if ( requestCode == CONTACT_REQUEST_CODE ){
             data?.data?.let { uri ->
 
@@ -252,7 +252,9 @@ class CrimeDetailFragment : Fragment()
 
                     it.moveToFirst()
                     val suspectName = it.getString(0)
-                    selectedCrime.suspect = suspectName
+                    selectedCrime = selectedCrime.apply {
+                        suspect = suspectName
+                    }
                     bindViews()
                 }
             }
@@ -260,16 +262,33 @@ class CrimeDetailFragment : Fragment()
 
         if ( requestCode == PHOTO_CAPTURE ) {
             val bitmap = getScaledBitmap ()
-            crime_image.setImageBitmap( bitmap )
+            bitmap?.let {
+                crime_image.setImageBitmap( bitmap )
+                selectedCrime = selectedCrime.copy( photoName = fileLocation.path )
+                requireActivity().invalidateOptionsMenu()
+            }
             requireActivity().revokeUriPermission( providerUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION )
-            requireActivity().invalidateOptionsMenu()
         }
     }
 
     private fun getScaledBitmap(): Bitmap? {
+//        MediaStore.Images.Media.insertImage( requireActivity().contentResolver, scaledBitmap,"lkd", "" )
         val point = Point()
         requireActivity().windowManager.defaultDisplay.getSize( point )
-        return viewModel.getScaledBitmap( fileLocation.path, point.x, point.y)
+        val scaledBitmap = viewModel.getScaledBitmap( fileLocation.path, point.x, point.y)
+        scaledBitmap?.let {
+            exchangeImgSrc( it )
+        }
+        return scaledBitmap
+    }
+
+    private fun exchangeImgSrc( bitmap: Bitmap ): Boolean {
+        val fOut = FileOutputStream( fileLocation )
+        var success = false
+        fOut.use {
+            success = bitmap.compress(Bitmap.CompressFormat.JPEG, 50, it)
+        }
+        return success
     }
 
     private fun onBackPressed() {
@@ -279,10 +298,9 @@ class CrimeDetailFragment : Fragment()
         }
 
         viewModel.reverse()
-        val sucess = findNavController().popBackStack()
-        Toast.makeText( context, "$sucess" , Toast.LENGTH_SHORT).show()
+        val success = findNavController().popBackStack()
+        Toast.makeText( context, "$success" , Toast.LENGTH_SHORT).show()
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
        if ( item.itemId == R.id.share_photo )
        {
@@ -291,7 +309,6 @@ class CrimeDetailFragment : Fragment()
        }
         return false
     }
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate( R.menu.detail_frag_menu, menu )
 
