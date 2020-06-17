@@ -11,8 +11,7 @@
         android:label="CrimeListFragment" >
         <action
             android:id="@+id/action_crimeListFragment_to_crimeDetailFragment"
-            app:destination="@id/crimeDetailFragment"
-            app:popUpToInclusive="false" />
+            app:destination="@id/crimeDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/crimeDetailFragment"
